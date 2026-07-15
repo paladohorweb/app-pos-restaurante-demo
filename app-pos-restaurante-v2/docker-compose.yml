@@ -1,0 +1,38 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: nativa_pos
+      MYSQL_USER: nativa
+      MYSQL_PASSWORD: nativa_secret
+      MYSQL_ROOT_PASSWORD: root_secret
+    volumes:
+      - nativa_mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_secret"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+  backend:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mysql://mysql:3306/nativa_pos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USER: nativa
+      DB_PASSWORD: nativa_secret
+      CORS_ORIGIN: http://localhost:4200,http://localhost:8081
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"
+volumes:
+  nativa_mysql:

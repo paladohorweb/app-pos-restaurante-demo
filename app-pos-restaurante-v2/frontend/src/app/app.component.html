@@ -1,0 +1,209 @@
+<ng-container *ngIf="!loggedIn(); else application">
+  <section class="welcome">
+    <div class="welcome-image"></div>
+    <div class="welcome-overlay"></div>
+    <div class="welcome-content">
+      <div class="brand brand-light"><span class="brand-mark">N</span><span>NATIVA<small>RESTAURANTE · POS</small></span></div>
+      <div class="welcome-copy">
+        <span class="eyebrow">GESTIÓN GASTRONÓMICA, SIN FRICCIÓN</span>
+        <h1>Cada mesa.<br><em>Cada detalle.</em></h1>
+        <p>Una experiencia completa desde la reserva hasta el último pago. Diseñada para equipos que viven la hospitalidad.</p>
+        <div class="welcome-actions">
+          <button class="btn-primary btn-lg" (click)="login()">Entrar a la demo <i class="bi bi-arrow-right"></i></button>
+          <span><i class="bi bi-shield-check"></i> Datos de demostración · Sin registro</span>
+        </div>
+      </div>
+      <div class="welcome-stats">
+        <div><strong>6</strong><span>Módulos conectados</span></div>
+        <div><strong>100%</strong><span>Responsive</span></div>
+        <div><strong>24/7</strong><span>Control operativo</span></div>
+      </div>
+    </div>
+  </section>
+</ng-container>
+
+<ng-template #application>
+  <div class="app-shell">
+    <div class="mobile-backdrop" *ngIf="menuOpen()" (click)="menuOpen.set(false)"></div>
+    <aside class="sidebar" [class.open]="menuOpen()">
+      <div class="brand"><span class="brand-mark">N</span><span>NATIVA<small>RESTAURANTE · POS</small></span></div>
+      <nav>
+        <span class="nav-caption">OPERACIÓN</span>
+        <button *ngFor="let item of nav()" [class.active]="page() === item.page" (click)="go(item.page)">
+          <i class="bi" [ngClass]="item.icon"></i><span>{{item.label}}</span>
+          <b *ngIf="item.page === 'cocina' && activeOrders().length">{{activeOrders().length}}</b>
+        </button>
+      </nav>
+      <div class="sidebar-foot">
+        <button class="support"><i class="bi bi-headset"></i><span><strong>¿Necesitas ayuda?</strong><small>Soporte prioritario</small></span></button>
+        <button class="profile" (click)="logout()"><span class="avatar">LG</span><span><strong>Laura Gómez</strong><small>Administradora</small></span><i class="bi bi-box-arrow-right"></i></button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <button class="icon-btn menu-button" (click)="menuOpen.set(true)"><i class="bi bi-list"></i></button>
+        <div><span class="date">{{today | date:'EEEE, d MMMM':'':'es'}}</span><h2>{{pageTitle()}}</h2></div>
+        <div class="top-actions">
+          <span class="live"><i></i> Operación en vivo</span>
+          <button class="icon-btn" title="Reiniciar demo" (click)="resetDemo()"><i class="bi bi-arrow-counterclockwise"></i></button>
+          <button class="icon-btn notification"><i class="bi bi-bell"></i><b></b></button>
+          <button class="btn-primary new-reservation" (click)="openReservation()"><i class="bi bi-plus-lg"></i> Nueva reserva</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- DASHBOARD -->
+        <section *ngIf="page() === 'inicio'" class="page dashboard-page">
+          <div class="hero-card">
+            <div class="hero-copy"><span class="eyebrow">TURNO DE LA NOCHE</span><h1>Todo listo para<br>una gran jornada.</h1><p>Tienes {{state().reservations.length}} reservas en agenda y {{activeOrders().length}} comandas activas.</p><button (click)="go('salon')">Ver operación <i class="bi bi-arrow-up-right"></i></button></div>
+            <div class="hero-shade"></div>
+            <div class="hero-status"><span><i></i> Servicio abierto</span><strong>12:00 — 23:00</strong></div>
+          </div>
+
+          <div class="metric-grid">
+            <article><span class="metric-icon green"><i class="bi bi-cash-stack"></i></span><div><small>VENTAS DEL DÍA</small><strong>{{salesToday() | currency:'COP':'symbol-narrow':'1.0-0'}}</strong><em><i class="bi bi-arrow-up"></i> 12,4% vs. ayer</em></div></article>
+            <article><span class="metric-icon terracotta"><i class="bi bi-calendar2-check"></i></span><div><small>RESERVAS DE HOY</small><strong>{{(state().reservations | filterToday: today)?.length || 2}}</strong><em>Próxima a las 19:30</em></div></article>
+            <article><span class="metric-icon gold"><i class="bi bi-people"></i></span><div><small>MESAS OCUPADAS</small><strong>{{(state().tables | statusCount:'OCUPADA')}}<span> / {{state().tables.length}}</span></strong><em>Capacidad disponible</em></div></article>
+            <article><span class="metric-icon blue"><i class="bi bi-receipt"></i></span><div><small>TICKET PROMEDIO</small><strong>$ 92.400</strong><em><i class="bi bi-arrow-up"></i> 6,8% esta semana</em></div></article>
+          </div>
+
+          <div class="two-columns">
+            <article class="panel">
+              <div class="panel-head"><div><span class="eyebrow">PRÓXIMAS LLEGADAS</span><h3>Reservas de hoy</h3></div><button class="text-btn" (click)="go('reservas')">Ver agenda <i class="bi bi-arrow-right"></i></button></div>
+              <div class="arrival" *ngFor="let r of state().reservations | slice:0:3">
+                <div class="time-block"><strong>{{r.time}}</strong><span>{{r.date === today ? 'HOY' : (r.date | date:'dd MMM')}}</span></div>
+                <span class="avatar soft">{{initials(r.customerName)}}</span>
+                <div class="arrival-name"><strong>{{r.customerName}}</strong><span><i class="bi bi-people"></i> {{r.guests}} personas · {{r.area}}</span></div>
+                <span class="status-pill" [ngClass]="r.status.toLowerCase()">{{statusText(r.status)}}</span>
+                <button class="icon-btn" (click)="seatReservation(r)" [disabled]="r.status === 'CANCELADA'"><i class="bi bi-chevron-right"></i></button>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-head"><div><span class="eyebrow">RITMO DEL SERVICIO</span><h3>Comandas activas</h3></div><button class="text-btn" (click)="go('cocina')">Ver cocina <i class="bi bi-arrow-right"></i></button></div>
+              <div class="service-list">
+                <div *ngFor="let o of activeOrders() | slice:0:4"><span class="table-token">{{tableName(o.tableId).replace('Mesa ', 'M')}}</span><div><strong>{{tableName(o.tableId)}}</strong><small>{{o.items.length}} productos · {{elapsed(o.createdAt)}}</small></div><span class="status-pill" [ngClass]="o.status.toLowerCase()">{{statusText(o.status)}}</span></div>
+              </div>
+              <div class="service-footer"><span><i class="bi bi-stopwatch"></i> Tiempo promedio</span><strong>18 min</strong><div class="progress"><i></i></div></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- RESERVAS -->
+        <section *ngIf="page() === 'reservas'" class="page">
+          <div class="page-tools">
+            <div class="segmented"><button [class.active]="reservationFilter() === 'ACTIVAS'" (click)="reservationFilter.set('ACTIVAS')">Activas</button><button [class.active]="reservationFilter() === 'HOY'" (click)="reservationFilter.set('HOY')">Hoy</button><button [class.active]="reservationFilter() === 'TODAS'" (click)="reservationFilter.set('TODAS')">Todas</button></div>
+            <div class="capacity-note"><i class="bi bi-info-circle"></i> La disponibilidad valida mesa, horario y capacidad.</div>
+          </div>
+          <div class="reservation-summary">
+            <div><span class="metric-icon green"><i class="bi bi-calendar2-check"></i></span><p><small>RESERVAS ACTIVAS</small><strong>{{filteredReservations().length}}</strong></p></div>
+            <div><span class="metric-icon terracotta"><i class="bi bi-people"></i></span><p><small>COMENSALES ESPERADOS</small><strong>{{filteredReservations() | guestSum}}</strong></p></div>
+            <div><span class="metric-icon gold"><i class="bi bi-clock-history"></i></span><p><small>PRÓXIMA LLEGADA</small><strong>19:30</strong></p></div>
+          </div>
+          <article class="panel reservation-panel">
+            <div class="panel-head"><div><span class="eyebrow">AGENDA DEL RESTAURANTE</span><h3>Control de reservaciones</h3></div><button class="btn-primary" (click)="openReservation()"><i class="bi bi-plus-lg"></i> Crear reserva</button></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>FECHA Y HORA</th><th>CLIENTE</th><th>PERSONAS</th><th>UBICACIÓN</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let r of filteredReservations()">
+                    <td><strong>{{r.date | date:'dd MMM yyyy'}}</strong><span>{{r.time}}</span></td>
+                    <td><div class="customer"><span class="avatar soft">{{initials(r.customerName)}}</span><p><strong>{{r.customerName}}</strong><span>{{r.phone}}<em *ngIf="r.occasion"> · {{r.occasion}}</em></span></p></div></td>
+                    <td><strong><i class="bi bi-people"></i> {{r.guests}}</strong></td>
+                    <td><strong>{{r.tableId ? tableName(r.tableId) : 'Por asignar'}}</strong><span>{{r.area}}</span></td>
+                    <td><span class="status-pill" [ngClass]="r.status.toLowerCase()">{{statusText(r.status)}}</span></td>
+                    <td><div class="row-actions"><button *ngIf="r.status === 'PENDIENTE'" title="Confirmar" (click)="confirmReservation(r)"><i class="bi bi-check-lg"></i></button><button *ngIf="r.status === 'CONFIRMADA' || r.status === 'PENDIENTE'" title="Ubicar en mesa" (click)="seatReservation(r)"><i class="bi bi-box-arrow-in-right"></i></button><button *ngIf="r.status !== 'CANCELADA' && r.status !== 'EN_MESA'" title="Cancelar" (click)="cancelReservation(r)"><i class="bi bi-x-lg"></i></button></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- MESAS -->
+        <section *ngIf="page() === 'salon'" class="page">
+          <div class="page-tools"><div class="legend"><span><i class="available"></i> Disponible</span><span><i class="reserved"></i> Reservada</span><span><i class="occupied"></i> Ocupada</span><span><i class="billing"></i> Por cobrar</span></div><span class="capacity-note">{{state().tables.length}} mesas · capacidad total 38</span></div>
+          <div *ngFor="let area of ['Salón','Terraza','VIP']" class="area-section">
+            <div class="area-heading"><h3>{{area}}</h3><span>{{(state().tables | areaCount:area)}} mesas</span></div>
+            <div class="tables-grid">
+              <button class="table-card" *ngFor="let t of state().tables | areaTables:area" [ngClass]="t.status.toLowerCase()" (click)="selectTable(t)">
+                <div class="table-top"><span class="table-icon"><i class="bi bi-grid-3x3-gap"></i></span><span class="status-dot"></span></div>
+                <div><strong>{{t.name}}</strong><span><i class="bi bi-people"></i> {{t.guests || 0}} / {{t.capacity}} personas</span></div>
+                <div class="table-meta"><span>{{statusText(t.status)}}</span><b *ngIf="t.openedAt">{{elapsed(t.openedAt)}}</b></div>
+                <div class="table-total" *ngIf="store.tableTotal(t.id)">{{store.tableTotal(t.id) | currency:'COP':'symbol-narrow':'1.0-0'}}</div>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- POS -->
+        <section *ngIf="page() === 'pos'" class="page pos-layout">
+          <div class="pos-catalog">
+            <div class="pos-heading"><div><span class="eyebrow">NUEVA COMANDA</span><h3>Menú del restaurante</h3></div><select [ngModel]="selectedTableId()" (ngModelChange)="selectedTableId.set(+$event)"><option [ngValue]="null">Selecciona una mesa</option><option *ngFor="let t of state().tables" [ngValue]="t.id" [disabled]="t.status === 'RESERVADA'">{{t.name}} · {{statusText(t.status)}}</option></select></div>
+            <div class="category-list"><button *ngFor="let c of categories()" [class.active]="selectedCategory() === c" (click)="selectedCategory.set(c)">{{c}}</button></div>
+            <div class="product-grid">
+              <button class="product-card" *ngFor="let p of filteredProducts()" (click)="addProduct(p)">
+                <div class="product-image"><img [src]="p.image" [alt]="p.name"><span>{{p.category}}</span><i class="bi bi-plus-lg"></i></div>
+                <div><h4>{{p.name}}</h4><p>{{p.description}}</p><strong>{{p.price | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div>
+              </button>
+            </div>
+          </div>
+          <aside class="order-panel">
+            <div class="order-head"><div><span class="eyebrow">PEDIDO ACTUAL</span><h3>{{selectedTableId() ? tableName(selectedTableId()!) : 'Sin mesa'}}</h3></div><span class="order-number">{{cart().length}} ítems</span></div>
+            <div class="selected-table" *ngIf="selectedTableId() as id"><span class="table-token">{{tableName(id).replace('Mesa ', 'M')}}</span><div><strong>{{tableName(id)}}</strong><small>{{table(id)?.guests || 0}} comensales · Mesera Laura</small></div></div>
+            <div class="empty-cart" *ngIf="!cart().length"><i class="bi bi-basket2"></i><strong>La comanda está vacía</strong><span>Selecciona productos del menú para comenzar.</span></div>
+            <div class="cart-list" *ngIf="cart().length">
+              <div class="cart-item" *ngFor="let item of cart()"><div class="qty"><button (click)="changeQty(item.productId,-1)">−</button><strong>{{item.quantity}}</strong><button (click)="changeQty(item.productId,1)">+</button></div><div><strong>{{item.name}}</strong><input [(ngModel)]="item.notes" placeholder="Nota para cocina"></div><b>{{item.price * item.quantity | currency:'COP':'symbol-narrow':'1.0-0'}}</b></div>
+            </div>
+            <div class="order-totals"><div><span>Subtotal</span><strong>{{cartTotal() | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div><div><span>Impuestos incluidos</span><strong>$ 0</strong></div><div class="grand"><span>Total</span><strong>{{cartTotal() | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div></div>
+            <button class="send-order" [disabled]="!cart().length" (click)="sendOrder()"><i class="bi bi-send"></i> Enviar pedido a cocina</button>
+          </aside>
+        </section>
+
+        <!-- COCINA -->
+        <section *ngIf="page() === 'cocina'" class="page kitchen-page">
+          <div class="kitchen-toolbar"><div><span class="live"><i></i> Sincronizado en tiempo real</span><span>Las comandas avanzan hasta “Servida” para habilitar el cobro.</span></div><strong><i class="bi bi-stopwatch"></i> Promedio 18 min</strong></div>
+          <div class="kitchen-board">
+            <div class="kitchen-column" *ngFor="let status of ['NUEVA','PREPARANDO','LISTA']">
+              <div class="column-head"><h3><i [ngClass]="{'new':status === 'NUEVA','prep':status === 'PREPARANDO','ready':status === 'LISTA'}"></i>{{statusText(status)}}</h3><span>{{(activeOrders() | orderStatus:status).length}}</span></div>
+              <div class="ticket" *ngFor="let o of activeOrders() | orderStatus:status">
+                <div class="ticket-head"><div><span class="table-token">{{tableName(o.tableId).replace('Mesa ', 'M')}}</span><p><strong>{{tableName(o.tableId)}}</strong><small>Comanda #{{o.id}}</small></p></div><span class="ticket-time" [class.late]="elapsed(o.createdAt).replace(' min','') > '25'">{{elapsed(o.createdAt)}}</span></div>
+                <div class="ticket-items"><div *ngFor="let i of o.items"><strong>{{i.quantity}}×</strong><span>{{i.name}}<em *ngIf="i.notes">{{i.notes}}</em></span></div></div>
+                <div class="ticket-foot"><span><i class="bi bi-person"></i> {{o.waiter}}</span><button (click)="advance(o)"><i class="bi" [ngClass]="actionIcon(o)"></i>{{actionLabel(o)}}</button></div>
+              </div>
+              <div class="column-empty" *ngIf="!(activeOrders() | orderStatus:status).length"><i class="bi bi-check2-circle"></i><span>Sin comandas</span></div>
+            </div>
+          </div>
+          <article class="served-strip" *ngIf="(activeOrders() | orderStatus:'SERVIDA').length"><div><i class="bi bi-check2-all"></i><span><strong>Pedidos entregados</strong><small>Listos para cobrar en caja</small></span></div><div class="served-chips"><button *ngFor="let o of activeOrders() | orderStatus:'SERVIDA'" (click)="selectedTableId.set(o.tableId); go('caja')">{{tableName(o.tableId)}} · {{orderTotal(o) | currency:'COP':'symbol-narrow':'1.0-0'}} <i class="bi bi-arrow-right"></i></button></div></article>
+        </section>
+
+        <!-- CAJA -->
+        <section *ngIf="page() === 'caja'" class="page">
+          <div class="cash-summary"><div><small>VENTAS REGISTRADAS</small><strong>{{salesToday() | currency:'COP':'symbol-narrow':'1.0-0'}}</strong><span><i class="bi bi-arrow-up"></i> 12,4% sobre ayer</span></div><div><small>PAGOS DE LA DEMO</small><strong>{{state().payments.length}}</strong><span>Transacciones completadas</span></div><div><small>PENDIENTE POR COBRAR</small><strong>{{(state().orders | unpaidTotal) | currency:'COP':'symbol-narrow':'1.0-0'}}</strong><span>{{activeOrders().length}} comandas abiertas</span></div></div>
+          <div class="billing-grid">
+            <article class="bill-card" *ngFor="let t of state().tables">
+              <ng-container *ngIf="store.tableTotal(t.id) > 0">
+                <div class="bill-head"><span class="table-token">{{t.name.replace('Mesa ', 'M')}}</span><div><h3>{{t.name}}</h3><span>{{t.guests}} comensales · {{elapsed(t.openedAt)}}</span></div><span class="status-pill" [ngClass]="t.status.toLowerCase()">{{statusText(t.status)}}</span></div>
+                <div class="bill-orders"><div *ngFor="let o of tableOrders(t.id)"><span>Comanda #{{o.id}} · {{o.items.length}} productos</span><strong>{{orderTotal(o) | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div></div>
+                <div class="bill-total"><span>Total de la mesa</span><strong>{{store.tableTotal(t.id) | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div>
+                <button class="btn-primary full" [disabled]="t.status !== 'POR_COBRAR'" (click)="pay(t.id)"><i class="bi bi-credit-card"></i> {{t.status === 'POR_COBRAR' ? 'Cobrar y liberar mesa' : 'Esperando servicio'}}</button>
+              </ng-container>
+            </article>
+          </div>
+          <article class="panel history" *ngIf="state().payments.length"><div class="panel-head"><div><span class="eyebrow">CIERRE DE CAJA</span><h3>Pagos recientes</h3></div></div><div class="payment-row" *ngFor="let p of state().payments"><span class="metric-icon green"><i class="bi bi-check-lg"></i></span><div><strong>{{tableName(p.tableId)}} · {{statusText(p.method)}}</strong><span>{{p.createdAt | date:'short'}}</span></div><b>{{p.amount | currency:'COP':'symbol-narrow':'1.0-0'}}</b></div></article>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL RESERVA -->
+  <div class="modal-backdrop" *ngIf="reservationModal()" (click)="reservationModal.set(false)">
+    <section class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head"><div><span class="eyebrow">NUEVA RESERVACIÓN</span><h2>Recibir a un cliente</h2><p>Registra los datos y asegura la mejor mesa disponible.</p></div><button class="icon-btn" (click)="reservationModal.set(false)"><i class="bi bi-x-lg"></i></button></div>
+      <form (ngSubmit)="saveReservation()">
+        <div class="form-grid"><label class="wide"><span>Nombre del cliente *</span><input name="customer" [(ngModel)]="reservationDraft.customerName" placeholder="Ej. Camila Rodríguez"></label><label><span>Teléfono *</span><input name="phone" [(ngModel)]="reservationDraft.phone" placeholder="300 000 0000"></label><label><span>Número de personas *</span><input name="guests" [(ngModel)]="reservationDraft.guests" type="number" min="1" max="20"></label><label><span>Fecha *</span><input name="date" [(ngModel)]="reservationDraft.date" type="date" [min]="today"></label><label><span>Hora *</span><input name="time" [(ngModel)]="reservationDraft.time" type="time"></label><label><span>Área preferida</span><select name="area" [(ngModel)]="reservationDraft.area"><option>Salón</option><option>Terraza</option><option>VIP</option></select></label><label><span>Mesa (opcional)</span><select name="table" [(ngModel)]="reservationDraft.tableId"><option [ngValue]="null">Asignar al llegar</option><option *ngFor="let t of state().tables" [ngValue]="t.id" [disabled]="t.capacity < reservationDraft.guests">{{t.name}} · {{t.capacity}} pax</option></select></label><label><span>Ocasión</span><select name="occasion" [(ngModel)]="reservationDraft.occasion"><option value="">Ninguna</option><option>Cumpleaños</option><option>Aniversario</option><option>Negocios</option><option>Celebración</option></select></label><label class="wide"><span>Notas para el equipo</span><textarea name="notes" [(ngModel)]="reservationDraft.notes" rows="3" placeholder="Alergias, silla para bebé, ubicación especial..."></textarea></label></div>
+        <div class="modal-actions"><button type="button" class="btn-secondary" (click)="reservationModal.set(false)">Cancelar</button><button class="btn-primary" type="submit"><i class="bi bi-calendar2-check"></i> Guardar reserva</button></div>
+      </form>
+    </section>
+  </div>
+</ng-template>
