@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.*;
 public class WebConfig implements WebMvcConfigurer {
     @Value("${app.cors-origin}") private String corsOrigin;
     @Override public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**").allowedOrigins(corsOrigin.split(",")).allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE").allowedHeaders("*");
+        registry.addMapping("/api/**").allowedOrigins(corsOrigin.split(",")).allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE").allowedHeaders("*").exposedHeaders("X-JGM-License-State","X-JGM-Billing-Url");
     }
 }
+

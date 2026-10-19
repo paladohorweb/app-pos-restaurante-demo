@@ -1,0 +1,20 @@
+name: Verify POS license integration
+on:
+  push:
+    paths: ['app-pos-restaurante-v2/backend/**', '.github/workflows/jgm-license.yml']
+  pull_request:
+    paths: ['app-pos-restaurante-v2/backend/**', '.github/workflows/jgm-license.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: '17'
+          cache: maven
+      - run: mvn --batch-mode --no-transfer-progress -f app-pos-restaurante-v2/backend/pom.xml clean verify
