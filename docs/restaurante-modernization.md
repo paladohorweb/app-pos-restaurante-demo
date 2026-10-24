@@ -36,7 +36,7 @@ Pruebas de navegador: flujo mesa → pedido → cocina → cobro → métricas, 
 
 Prueba adicional con frontend y backend reales: autenticación y refresh al recargar, persistencia de una comanda y su pago, actualización del dashboard y cierre de sesión.
 
-Las comprobaciones locales usan Java 17 Amazon Corretto y H2. Docker/MySQL y el resultado de GitHub Actions deben validarse en sus entornos; no se presentan como comprobados localmente.
+Las comprobaciones locales usan Java 17 Amazon Corretto y H2. Los dos workflows de GitHub Actions también completaron correctamente las pruebas con Corretto 17 y Node 20. Se fijó Ubuntu 24.04 porque Playwright 1.58.2 no admite el nuevo runner Ubuntu 26.04 de ubuntu-latest. Docker/MySQL no se presentan como comprobados localmente.
 
 ## Pendiente para paridad completa y venta como SaaS
 
@@ -53,3 +53,11 @@ Esta entrega sigue siendo un demo/piloto. No equivale a toda la seguridad y oper
 9. Accesibilidad más exhaustiva y lector de pantalla; la revisión responsive y las etiquetas no acreditan conformidad WCAG completa. Modo offline real con sincronización de operaciones requiere una etapa independiente.
 
 Se conservan estas limitaciones de forma explícita para que el demo muestre funciones operativas comprobables sin anunciar capacidades productivas pendientes.
+
+## Dependencias: hallazgos que siguen abiertos
+
+El 24 de octubre de 2026, `npm audit` informó inicialmente 68 paquetes afectados: 4 bajos, 24 moderados, 36 altos y 4 críticos. Se ejecutó una actualización compatible, sin `--force` y sin cambiar Angular 17. El resultado es 51 paquetes: 4 bajos, 20 moderados, 25 altos y 2 críticos. La compilación y las pruebas funcionales se repitieron después del cambio del lockfile.
+
+Los dos paquetes críticos restantes son `piscina` y `tar`, dependencias transitivas del entorno de construcción/CLI. El informe sugiere cambios mayores de Angular DevKit/CLI para resolver sus cadenas. No se aplicaron overrides de versiones mayores sin comprobar todas las herramientas. También permanecen avisos sobre Angular 17 y sus dependencias. Las cifras incluyen herramientas de desarrollo; no son una prueba de 51 fallos explotables en el sitio compilado. Tampoco se descarta el riesgo en las máquinas y procesos de construcción.
+
+El equipo de Angular ya no mantiene Angular 17 en soporte oficial: [política de versiones](https://angular.dev/reference/releases) y [avisos oficiales](https://github.com/angular/angular/security/advisories). La restricción de conservar Angular 17 se mantuvo para esta demo. Antes de producción debe acordarse una migración a una línea con soporte o una estrategia de parches mantenidos y verificar los hallazgos restantes. El éxito del CI funcional no constituye aprobación de seguridad para producción.
