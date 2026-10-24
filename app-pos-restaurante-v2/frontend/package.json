@@ -6,7 +6,11 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test --watch=false"
+    "test": "node scripts/e2e.cjs",
+    "test:e2e": "node scripts/e2e.cjs",
+    "start:api": "ng serve --configuration api --proxy-config proxy.conf.json",
+    "test:api": "node scripts/api-e2e.cjs",
+    "format": "prettier --write \"src/**/*.{ts,html,css}\" \"scripts/*.cjs\""
   },
   "dependencies": {
     "@angular/animations": "17.3.12",
@@ -17,6 +21,7 @@
     "@angular/platform-browser": "17.3.12",
     "@angular/platform-browser-dynamic": "17.3.12",
     "@angular/router": "17.3.12",
+    "bootstrap": "5.3.8",
     "bootstrap-icons": "1.13.1",
     "rxjs": "7.8.2",
     "sweetalert2": "11.26.25",
@@ -27,6 +32,8 @@
     "@angular-devkit/build-angular": "17.3.17",
     "@angular/cli": "17.3.17",
     "@angular/compiler-cli": "17.3.12",
+    "playwright": "1.58.2",
+    "prettier": "3.6.2",
     "typescript": "5.4.5"
   }
 }

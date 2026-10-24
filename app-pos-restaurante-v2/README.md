@@ -1,150 +1,136 @@
-# Nativa POS Restaurante · V2
+# Nativa POS · Frontend y backend
 
-Demo profesional full stack para vender y presentar un sistema de operación gastronómica. Incluye el recorrido real **reserva → llegada → mesa → pedido → cocina → entrega → cobro**.
+Angular 17.3.12 standalone, Bootstrap 5.3.8, Bootstrap Icons, CSS y SweetAlert2. API con Java 17 Amazon Corretto, Spring Boot 4.0.8, Spring Security, JWT, JPA y Flyway. H2 en perfil de demostración; MySQL 8.4 en perfil `prod`.
 
-## Qué incluye
+## 1. Descargar la rama
 
-- Frontend Angular 17 Standalone, responsive y listo para Netlify.
-- Motor de demo con `localStorage`: la información sobrevive al recargar la página.
-- Reservas con fecha, hora, capacidad, área, mesa, ocasión, notas y estados.
-- Mapa de mesas: disponible, reservada, ocupada y por cobrar.
-- POS con menú visual, cantidades, notas para cocina y total.
-- Monitor de cocina: nueva, preparando, lista y servida.
-- Caja: consolida todas las comandas abiertas por mesa, registra el medio de pago y libera la mesa.
-- Backend Spring Boot 3.5 / Java 17 con API REST, JPA, validaciones, MySQL, H2 y Flyway.
-- Docker Compose para levantar frontend, backend y MySQL.
-- Imágenes gastronómicas originales incluidas dentro del proyecto.
-
-## Estructura
-
-```text
-app-pos-restaurante-v2/
-├── frontend/          Angular 17 + demo persistente
-├── backend/           Spring Boot + API REST
-├── docker-compose.yml Front + API + MySQL
-├── netlify.toml       Configuración de despliegue frontend
-└── README.md
+```powershell
+git clone https://github.com/paladohorweb/app-pos-restaurante-demo.git
+cd app-pos-restaurante-demo
+git switch feature/restaurante-modernization
+cd app-pos-restaurante-v2
 ```
 
-## Ejecutar el frontend
+Si ya tienes el repositorio:
 
-Requisitos: Node 20+ y npm.
+```powershell
+git fetch origin
+git switch --track origin/feature/restaurante-modernization
+```
 
-```bash
+No sobrescribas cambios locales pendientes. La modernización se encuentra en una rama independiente.
+
+## 2. Solo demo visual, sin backend
+
+En una terminal:
+
+```powershell
 cd frontend
-npm install
+npm ci
 npm start
 ```
 
-Abre `http://localhost:4200`. En la portada pulsa **Entrar a la demo**. La demo no exige usuario ni contraseña.
+Abre http://localhost:4200. Elige Administración, Salón, Cocina o Caja. La selección de rol en este modo sirve para explorar el demo; no es un mecanismo de seguridad. Los datos se guardan en este navegador y se pueden reiniciar desde el menú superior o Mi espacio.
 
-Para comprobar el paquete de producción:
+## 3. Frontend y backend conectados, sin instalar MySQL
 
-```bash
-npm run build
-```
+Requisitos: Node 20, Maven 3.9 y Amazon Corretto 17. Comprueba `node -v`, `mvn -v` y `java -version`.
 
-El resultado queda en `frontend/dist/nativa-pos/browser`.
+Terminal 1 desde `app-pos-restaurante-v2`:
 
-## Subir a Netlify
-
-### Opción recomendada: repositorio Git
-
-1. Sube toda la carpeta `app-pos-restaurante-v2` a GitHub.
-2. En Netlify selecciona **Add new site → Import an existing project**.
-3. Elige el repositorio. Netlify leerá automáticamente `netlify.toml`.
-4. Confirma:
-   - Base directory: `frontend`
-   - Build command: `npm run build`
-   - Publish directory: `frontend/dist/nativa-pos/browser` (la interfaz puede mostrarlo relativo al repositorio).
-5. Pulsa **Deploy site**.
-
-### Opción rápida: arrastrar y soltar
-
-1. Ejecuta `cd frontend && npm install && npm run build`.
-2. En Netlify Drop arrastra **solo la carpeta** `frontend/dist/nativa-pos/browser`.
-
-No subas `frontend/src` ni `backend` en el método de arrastrar y soltar. Netlify alojará la demo Angular; los datos se guardan en el navegador de cada visitante.
-
-## Ejecutar el backend
-
-Requisitos: Java 17 y Maven 3.9+.
-
-```bash
+```powershell
 cd backend
-mvn spring-boot:run
+mvn spring-boot:run "-Dspring-boot.run.profiles=demo"
 ```
 
-El perfil predeterminado `demo` usa H2 en memoria y carga información de muestra. La API queda en `http://localhost:8080/api`.
+Terminal 2 desde `app-pos-restaurante-v2`:
 
-Endpoints principales:
-
-```text
-GET    /api/health
-GET    /api/products
-GET    /api/tables
-GET    /api/reservations
-POST   /api/reservations
-PATCH  /api/reservations/{id}/status?status=CONFIRMADA
-POST   /api/reservations/{id}/seat
-POST   /api/tables/{id}/open
-GET    /api/orders
-POST   /api/orders
-POST   /api/orders/{id}/advance
-POST   /api/tables/{id}/pay
-GET    /api/payments
+```powershell
+cd frontend
+npm ci
+npm run start:api
 ```
 
-Ejemplo de una reserva:
+Abre http://localhost:4200. El proxy lleva `/api` al puerto 8080. Este perfil usa una base H2 temporal que se elimina al reiniciar. No requiere licencias ni bootstrap de producción.
 
-```json
-{
-  "customerName": "Camila Rodríguez",
-  "phone": "3001234567",
-  "date": "2026-07-18",
-  "time": "20:00",
-  "guests": 4,
-  "area": "Salón",
-  "tableId": 4,
-  "occasion": "Cumpleaños",
-  "notes": "Silla para bebé"
-}
+| Usuario | Contraseña del perfil demo | Rol |
+|---|---|---|
+| `admin` | `DemoNativa2026!` | Administración |
+| `mesero` | `DemoNativa2026!` | Salón y comandas |
+| `cocina` | `DemoNativa2026!` | Monitor de cocina |
+| `cajero` | `DemoNativa2026!` | Caja y reportes |
+
+Estas cuentas solo se crean con el perfil `demo`. No publiques este backend de prueba con datos reales.
+
+## 4. MySQL persistente con Docker local
+
+Desde `app-pos-restaurante-v2`:
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-Ejemplo de pedido:
+Completa `.env`: contraseñas de MySQL, una contraseña propia de administrador de entre 14 y 72 bytes y `JWT_SECRET` aleatorio de al menos 32 bytes. Para generar el secreto:
 
-```json
-{
-  "tableId": 4,
-  "waiter": "Laura Gómez",
-  "items": [
-    {"productId": 1, "quantity": 2, "notes": "Una sin cebolla"},
-    {"productId": 4, "quantity": 1, "notes": ""}
-  ]
-}
+```powershell
+python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-## Ejecutar el full stack con Docker
+Genera un valor diferente para cada secreto. `.env` está excluido de Git.
 
-```bash
-docker compose up --build
+```powershell
+docker compose up -d --build
+docker compose logs -f backend
 ```
 
-- Frontend: `http://localhost:8081`
-- API: `http://localhost:8080/api`
-- MySQL: `localhost:3306`
+Frontend: http://localhost:8081. API: http://localhost:8080/api/health. MySQL local: puerto 3308. El frontend de Docker queda configurado en modo API automáticamente. Ingresa con `BOOTSTRAP_ADMIN_USERNAME` y `BOOTSTRAP_ADMIN_PASSWORD` de `.env`.
 
-El perfil de producción usa variables `DB_URL`, `DB_USER`, `DB_PASSWORD` y `CORS_ORIGIN`. Cambia las contraseñas del archivo Compose antes de un despliegue real.
+La variable correcta es `DB_PASSWORD`; se corrigió la incompatibilidad anterior entre Docker y `DB_PASS`. El bootstrap solo crea el administrador si no existe: no cambia una contraseña ya guardada. Las migraciones V1–V3 se aplican sin borrar tablas.
 
-## Recorrido sugerido para vender la demo
+`docker compose down` conserva la base. No uses `down -v` si necesitas conservar sus datos. Esta configuración expone servicios solo en la máquina local y usa cookies sin Secure para HTTP local. Hosting público requiere HTTPS y `COOKIE_SECURE=true`.
 
-1. En **Reservas**, crea o confirma una reservación.
-2. Pulsa el icono de llegada para ubicar al cliente en una mesa.
-3. Agrega platos en **Pedidos**, escribe una nota y envía la comanda.
-4. En **Cocina**, avanza la comanda: nueva → preparando → lista → servida.
-5. En **Caja**, cobra la mesa con efectivo, tarjeta, Nequi o Daviplata.
-6. Comprueba en **Mesas** que volvió a quedar disponible.
+## 5. Recorrido funcional
 
-## Alcance técnico de la demo
+1. Mesas y salón → abre una mesa y registra comensales.
+2. Punto de venta → selecciona platos y notas → envía a cocina.
+3. Cocina → Comenzar → Marcar lista → Entregar.
+4. Caja → confirma que recibiste el pago por un medio externo → registra el cobro.
+5. La mesa vuelve a Disponible. El dashboard, la gráfica y los reportes se actualizan.
 
-El frontend desplegable en Netlify usa un repositorio local de demostración para que funcione sin servidor. El backend contiene las mismas reglas de negocio y está listo para desplegarse por separado en un servicio Java (Render, Railway, Fly.io, AWS, etc.). Para una comercialización real, el siguiente paso es reemplazar el repositorio demo por un cliente HTTP, agregar autenticación JWT, permisos por rol, facturación electrónica e integración de impresión.
+Las reservas permiten confirmar, cancelar y registrar llegada a una mesa con capacidad suficiente. Una mesa reservada exige registrar la llegada antes de enviar pedidos. Las comandas deben estar servidas antes de cobrar. El modo API calcula precios desde la base y serializa cobros concurrentes por mesa; el frontend mantiene una clave de idempotencia durante el reintento del mismo cobro en la sesión abierta.
+
+Los cobros son registros manuales. Nequi, Daviplata y tarjeta no están conectados a una pasarela; debes verificar el ingreso externamente. No se emite factura electrónica.
+
+## 6. Pruebas
+
+```powershell
+cd backend
+mvn verify
+cd ../frontend
+npm ci
+npm run build
+npx playwright install chromium
+npm test
+npm run test:api
+```
+
+La última prueba levanta el JAR de backend, conecta Angular con la API, inicia sesión, renueva la sesión al recargar, abre una mesa, envía y sirve una comanda, registra el pago y cierra sesión. Requiere haber ejecutado `mvn verify` antes.
+
+El workflow `.github/workflows/restaurante-ci.yml` realiza estos pasos con Node 20 y Corretto 17. Las pruebas de migración usan H2 en modo MySQL; no sustituyen una validación contra una instancia MySQL real. El formato se aplica con `npm run format` en frontend.
+
+## 7. Netlify: conservar el demo estático
+
+La configuración raíz establece:
+
+- Base: `app-pos-restaurante-v2/frontend`.
+- Comando: `npm ci && npm run build`.
+- Publish, relativo a Base: `dist/nativa-pos/browser`.
+- Node: 20.
+
+Para revisar la rama usa un deploy de vista previa o configura una branch deploy. No es necesario reemplazar el sitio actual para revisar el cambio. Esta tarea prepara código y configuración; no publica ni cambia el sitio existente.
+
+El build normal genera `assets/runtime-config.json` con `mode: demo`. `npm run start:api` utiliza una configuración Angular diferente que produce `mode: api` sin editar archivos fuente. En hosting con backend, sirve `/api` mediante un proxy del mismo origen y protege la cookie con HTTPS. No guardes JWT_SECRET, claves de integración ni credenciales en Angular.
+
+## 8. Alcance
+
+Lee [la auditoría y el trabajo pendiente](../docs/restaurante-modernization.md). La modernización visual y el flujo conectado están implementados. La paridad completa con las capacidades de seguridad y operación de BarberKong exige la siguiente etapa descrita allí.

@@ -3,116 +3,574 @@
     <div class="welcome-image"></div>
     <div class="welcome-overlay"></div>
     <div class="welcome-content">
-      <div class="brand brand-light"><span class="brand-mark">N</span><span>NATIVA<small>RESTAURANTE · POS</small></span></div>
+      <div class="brand brand-light">
+        <span class="brand-mark">N<span>✦</span></span
+        ><span>NATIVA<small>GASTRONOMÍA EN SINTONÍA</small></span>
+      </div>
       <div class="welcome-copy">
-        <span class="eyebrow">GESTIÓN GASTRONÓMICA, SIN FRICCIÓN</span>
-        <h1>Cada mesa.<br><em>Cada detalle.</em></h1>
-        <p>Una experiencia completa desde la reserva hasta el último pago. Diseñada para equipos que viven la hospitalidad.</p>
-        <div class="welcome-actions">
-          <button class="btn-primary btn-lg" (click)="login()">Entrar a la demo <i class="bi bi-arrow-right"></i></button>
-          <span><i class="bi bi-shield-check"></i> Datos de demostración · Sin registro</span>
-        </div>
+        <span class="eyebrow">EL SABOR DE UNA BUENA OPERACIÓN</span>
+        <h1>Tu restaurante.<br /><em>A otro nivel.</em></h1>
+        <p>
+          Del primer “bienvenidos” a la última comanda. Conecta tu salón, cocina
+          y caja en un mismo espacio.
+        </p>
+        <form class="login-form" (ngSubmit)="login()">
+          <ng-container *ngIf="store.mode() === 'demo'; else apiLogin"
+            ><label
+              >Explora la experiencia como<select
+                name="role"
+                [(ngModel)]="roleDraft"
+              >
+                <option value="ADMIN">Administración · vista completa</option>
+                <option value="MESERO">Equipo de salón</option>
+                <option value="COCINA">Equipo de cocina</option>
+                <option value="CAJERO">Equipo de caja</option>
+              </select></label
+            ><button class="btn-primary btn-lg" [disabled]="busy()">
+              Explorar demo
+              <i aria-hidden="true" class="bi bi-arrow-up-right"></i></button
+            ><small
+              ><i aria-hidden="true" class="bi bi-info-circle"></i> Simulación
+              con datos en este navegador. No procesa pagos reales.</small
+            ></ng-container
+          >
+          <ng-template #apiLogin
+            ><label
+              >Usuario<input
+                name="username"
+                autocomplete="username"
+                [(ngModel)]="username"
+                required
+                maxlength="120" /></label
+            ><label
+              >Contraseña
+              <div class="password-field">
+                <input
+                  name="password"
+                  autocomplete="current-password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  [(ngModel)]="password"
+                  required
+                  maxlength="72"
+                /><button
+                  type="button"
+                  [attr.aria-label]="
+                    showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                  "
+                  (click)="showPassword = !showPassword"
+                >
+                  <i
+                    aria-hidden="true"
+                    class="bi"
+                    [class.bi-eye]="!showPassword"
+                    [class.bi-eye-slash]="showPassword"
+                  ></i>
+                </button></div></label
+            ><button class="btn-primary btn-lg" [disabled]="busy()">
+              {{ busy() ? "Conectando…" : "Entrar a mi restaurante" }}
+              <i aria-hidden="true" class="bi bi-arrow-right"></i></button
+            ><small
+              >Acceso seguro del equipo · permisos según tu rol</small
+            ></ng-template
+          >
+          <p role="alert" *ngIf="store.error()">{{ store.error() }}</p>
+        </form>
       </div>
       <div class="welcome-stats">
-        <div><strong>6</strong><span>Módulos conectados</span></div>
-        <div><strong>100%</strong><span>Responsive</span></div>
-        <div><strong>24/7</strong><span>Control operativo</span></div>
+        <div><strong>01</strong><span>Un solo espacio</span></div>
+        <div><strong>06</strong><span>Flujos conectados</span></div>
+        <div><strong>∞</strong><span>Mejores experiencias</span></div>
       </div>
+      <a
+        class="welcome-credit"
+        href="https://wa.me/573233098671"
+        target="_blank"
+        rel="noopener"
+        >Una solución de JGMSolutions
+        <i aria-hidden="true" class="bi bi-arrow-up-right"></i
+      ></a>
     </div>
   </section>
 </ng-container>
 
 <ng-template #application>
-  <div class="app-shell">
-    <div class="mobile-backdrop" *ngIf="menuOpen()" (click)="menuOpen.set(false)"></div>
+  <div class="app-shell" [class.sidebar-collapsed]="collapsed()">
+    <div
+      class="mobile-backdrop"
+      *ngIf="menuOpen()"
+      (click)="menuOpen.set(false)"
+    ></div>
     <aside class="sidebar" [class.open]="menuOpen()">
-      <div class="brand"><span class="brand-mark">N</span><span>NATIVA<small>RESTAURANTE · POS</small></span></div>
+      <div class="brand">
+        <span class="brand-mark">N</span
+        ><span class="brand-text">NATIVA<small>RESTAURANTE · POS</small></span>
+      </div>
       <nav>
         <span class="nav-caption">OPERACIÓN</span>
-        <button *ngFor="let item of nav()" [class.active]="page() === item.page" (click)="go(item.page)">
-          <i class="bi" [ngClass]="item.icon"></i><span>{{item.label}}</span>
-          <b *ngIf="item.page === 'cocina' && activeOrders().length">{{activeOrders().length}}</b>
+        <button
+          *ngFor="let item of nav()"
+          [attr.title]="item.label"
+          [class.active]="page() === item.page"
+          (click)="go(item.page)"
+        >
+          <i aria-hidden="true" class="bi" [ngClass]="item.icon"></i
+          ><span>{{ item.label }}</span>
+          <b *ngIf="item.page === 'cocina' && activeOrders().length">{{
+            activeOrders().length
+          }}</b>
         </button>
       </nav>
       <div class="sidebar-foot">
-        <button class="support"><i class="bi bi-headset"></i><span><strong>¿Necesitas ayuda?</strong><small>Soporte prioritario</small></span></button>
-        <button class="profile" (click)="logout()"><span class="avatar">LG</span><span><strong>Laura Gómez</strong><small>Administradora</small></span><i class="bi bi-box-arrow-right"></i></button>
+        <a
+          class="support"
+          href="https://wa.me/573233098671"
+          target="_blank"
+          rel="noopener"
+          ><i aria-hidden="true" class="bi bi-headset"></i
+          ><span
+            ><strong>Estamos para ayudarte</strong
+            ><small>Habla con JGMSolutions</small></span
+          ><i aria-hidden="true" class="bi bi-arrow-up-right"></i
+        ></a>
+        <button
+          class="profile"
+          aria-label="Cerrar sesión"
+          [disabled]="busy()"
+          (click)="logout()"
+        >
+          <span class="avatar">{{
+            initials(store.user()?.name || "Nativa")
+          }}</span
+          ><span
+            ><strong>{{ store.user()?.name }}</strong
+            ><small>{{ statusText(role()) }} · Cerrar sesión</small></span
+          ><i aria-hidden="true" class="bi bi-box-arrow-right"></i>
+        </button>
       </div>
     </aside>
 
     <main>
       <header class="topbar">
-        <button class="icon-btn menu-button" (click)="menuOpen.set(true)"><i class="bi bi-list"></i></button>
-        <div><span class="date">{{today | date:'EEEE, d MMMM':'':'es'}}</span><h2>{{pageTitle()}}</h2></div>
+        <button
+          class="icon-btn menu-button"
+          aria-label="Alternar menú"
+          [attr.aria-expanded]="menuOpen() || !collapsed()"
+          (click)="toggleMenu()"
+        >
+          <i aria-hidden="true" class="bi bi-list"></i>
+        </button>
+        <div>
+          <span class="date">{{
+            today() | date: "EEEE, d MMMM" : "" : "es"
+          }}</span>
+          <h2>{{ pageTitle() }}</h2>
+        </div>
         <div class="top-actions">
-          <span class="live"><i></i> Operación en vivo</span>
-          <button class="icon-btn" title="Reiniciar demo" (click)="resetDemo()"><i class="bi bi-arrow-counterclockwise"></i></button>
-          <button class="icon-btn notification"><i class="bi bi-bell"></i><b></b></button>
-          <button class="btn-primary new-reservation" (click)="openReservation()"><i class="bi bi-plus-lg"></i> Nueva reserva</button>
+          <span class="live" [class.demo-live]="store.mode() === 'demo'"
+            ><i aria-hidden="true"></i>
+            {{
+              store.mode() === "demo"
+                ? "DEMO INTERACTIVA"
+                : store.error()
+                  ? "CONEXIÓN PENDIENTE"
+                  : "API CONECTADA"
+            }}</span
+          >
+          <button
+            *ngIf="store.mode() === 'demo'"
+            class="icon-btn"
+            aria-label="Reiniciar demo"
+            title="Reiniciar demo"
+            (click)="resetDemo()"
+          >
+            <i aria-hidden="true" class="bi bi-arrow-counterclockwise"></i>
+          </button>
+          <button
+            class="icon-btn notification"
+            aria-label="Ver pendientes"
+            (click)="notifications()"
+          >
+            <i aria-hidden="true" class="bi bi-bell"></i><b></b>
+          </button>
+          <button
+            *ngIf="canReserve()"
+            class="btn-primary new-reservation"
+            (click)="openReservation()"
+          >
+            <i aria-hidden="true" class="bi bi-plus-lg"></i> Nueva reserva
+          </button>
         </div>
       </header>
 
       <div class="content">
-        <!-- DASHBOARD -->
+        <div class="operation-notice" *ngIf="store.mode() === 'demo'">
+          <i aria-hidden="true" class="bi bi-stars"></i
+          ><span
+            >Tu próximo restaurante empieza aquí.
+            <b>Estás explorando datos de demostración.</b></span
+          ><a href="https://wa.me/573233098671" target="_blank" rel="noopener"
+            >Quiero mi POS
+            <i aria-hidden="true" class="bi bi-arrow-up-right"></i
+          ></a>
+        </div>
+        <div class="api-error" role="alert" *ngIf="store.error()">
+          <span
+            >{{ store.error() }} Los datos visibles pueden estar
+            desactualizados.</span
+          ><button (click)="refresh()" [disabled]="busy()">Reintentar</button>
+        </div>
         <section *ngIf="page() === 'inicio'" class="page dashboard-page">
-          <div class="hero-card">
-            <div class="hero-copy"><span class="eyebrow">TURNO DE LA NOCHE</span><h1>Todo listo para<br>una gran jornada.</h1><p>Tienes {{state().reservations.length}} reservas en agenda y {{activeOrders().length}} comandas activas.</p><button (click)="go('salon')">Ver operación <i class="bi bi-arrow-up-right"></i></button></div>
-            <div class="hero-shade"></div>
-            <div class="hero-status"><span><i></i> Servicio abierto</span><strong>12:00 — 23:00</strong></div>
+          <div class="dashboard-heading">
+            <div>
+              <span class="eyebrow">CADA DETALLE CUENTA</span>
+              <h1>Un gran servicio <span>empieza aquí.</span></h1>
+              <p>Así se mueve tu restaurante hoy.</p>
+            </div>
+            <button class="btn-secondary" (click)="go('reportes')">
+              <i aria-hidden="true" class="bi bi-download"></i> Ver reportes
+            </button>
           </div>
-
           <div class="metric-grid">
-            <article><span class="metric-icon green"><i class="bi bi-cash-stack"></i></span><div><small>VENTAS DEL DÍA</small><strong>{{salesToday() | currency:'COP':'symbol-narrow':'1.0-0'}}</strong><em><i class="bi bi-arrow-up"></i> 12,4% vs. ayer</em></div></article>
-            <article><span class="metric-icon terracotta"><i class="bi bi-calendar2-check"></i></span><div><small>RESERVAS DE HOY</small><strong>{{(state().reservations | filterToday: today)?.length || 2}}</strong><em>Próxima a las 19:30</em></div></article>
-            <article><span class="metric-icon gold"><i class="bi bi-people"></i></span><div><small>MESAS OCUPADAS</small><strong>{{(state().tables | statusCount:'OCUPADA')}}<span> / {{state().tables.length}}</span></strong><em>Capacidad disponible</em></div></article>
-            <article><span class="metric-icon blue"><i class="bi bi-receipt"></i></span><div><small>TICKET PROMEDIO</small><strong>$ 92.400</strong><em><i class="bi bi-arrow-up"></i> 6,8% esta semana</em></div></article>
-          </div>
-
-          <div class="two-columns">
-            <article class="panel">
-              <div class="panel-head"><div><span class="eyebrow">PRÓXIMAS LLEGADAS</span><h3>Reservas de hoy</h3></div><button class="text-btn" (click)="go('reservas')">Ver agenda <i class="bi bi-arrow-right"></i></button></div>
-              <div class="arrival" *ngFor="let r of state().reservations | slice:0:3">
-                <div class="time-block"><strong>{{r.time}}</strong><span>{{r.date === today ? 'HOY' : (r.date | date:'dd MMM')}}</span></div>
-                <span class="avatar soft">{{initials(r.customerName)}}</span>
-                <div class="arrival-name"><strong>{{r.customerName}}</strong><span><i class="bi bi-people"></i> {{r.guests}} personas · {{r.area}}</span></div>
-                <span class="status-pill" [ngClass]="r.status.toLowerCase()">{{statusText(r.status)}}</span>
-                <button class="icon-btn" (click)="seatReservation(r)" [disabled]="r.status === 'CANCELADA'"><i class="bi bi-chevron-right"></i></button>
+            <article>
+              <div class="metric-top">
+                <small>Ventas de hoy</small
+                ><span class="metric-icon blue"
+                  ><i aria-hidden="true" class="bi bi-wallet2"></i
+                ></span>
+              </div>
+              <strong>{{ money(salesToday()) }}</strong
+              ><em>{{ todayPayments().length }} pagos registrados </em>
+            </article>
+            <article>
+              <div class="metric-top">
+                <small>Ocupación del salón</small
+                ><span class="metric-icon gold"
+                  ><i aria-hidden="true" class="bi bi-grid"></i
+                ></span>
+              </div>
+              <strong>{{ occupancy() }}<span>%</span></strong
+              ><em
+                >{{ occupied() }} de {{ state().tables.length }} mesas en
+                servicio</em
+              >
+              <div class="metric-progress">
+                <i aria-hidden="true" [style.width.%]="occupancy()"></i>
               </div>
             </article>
-            <article class="panel">
-              <div class="panel-head"><div><span class="eyebrow">RITMO DEL SERVICIO</span><h3>Comandas activas</h3></div><button class="text-btn" (click)="go('cocina')">Ver cocina <i class="bi bi-arrow-right"></i></button></div>
-              <div class="service-list">
-                <div *ngFor="let o of activeOrders() | slice:0:4"><span class="table-token">{{tableName(o.tableId).replace('Mesa ', 'M')}}</span><div><strong>{{tableName(o.tableId)}}</strong><small>{{o.items.length}} productos · {{elapsed(o.createdAt)}}</small></div><span class="status-pill" [ngClass]="o.status.toLowerCase()">{{statusText(o.status)}}</span></div>
+            <article>
+              <div class="metric-top">
+                <small>Comandas activas</small
+                ><span class="metric-icon terracotta"
+                  ><i aria-hidden="true" class="bi bi-fire"></i
+                ></span>
               </div>
-              <div class="service-footer"><span><i class="bi bi-stopwatch"></i> Tiempo promedio</span><strong>18 min</strong><div class="progress"><i></i></div></div>
+              <strong>{{
+                activeOrders().length.toString().padStart(2, "0")
+              }}</strong
+              ><em>{{
+                activeOrders().length
+                  ? "El equipo está en marcha"
+                  : "Todo al día en cocina"
+              }}</em>
+            </article>
+            <article>
+              <div class="metric-top">
+                <small>Ticket promedio</small
+                ><span class="metric-icon green"
+                  ><i aria-hidden="true" class="bi bi-receipt"></i
+                ></span>
+              </div>
+              <strong>{{ money(averageTicket()) }}</strong
+              ><em>{{
+                todayPayments().length
+                  ? "Por pago recibido hoy"
+                  : "Se calcula con el primer cobro"
+              }}</em>
+            </article>
+          </div>
+          <div class="analytics-grid">
+            <article class="panel sales-panel">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">EL PULSO DE TU NEGOCIO</span>
+                  <h3>Ventas durante el día</h3>
+                </div>
+                <span class="chart-legend"
+                  ><i aria-hidden="true"></i> Pagos recibidos · COP</span
+                >
+              </div>
+              <div class="chart-summary">
+                <strong>{{ money(salesToday()) }}</strong
+                ><span
+                  >{{ today() | date: "d MMM yyyy" : "" : "es" }} · Bogotá</span
+                >
+              </div>
+              <div
+                class="bar-chart"
+                role="img"
+                [attr.aria-label]="
+                  'Ventas por franja de dos horas. Total: ' +
+                  money(salesToday())
+                "
+              >
+                <div class="bar-column" *ngFor="let h of hourlySales()">
+                  <div class="bar-track">
+                    <div
+                      class="bar-value"
+                      [style.height.%]="(h.amount / maxHourly()) * 100"
+                      [title]="h.label + ': ' + money(h.amount)"
+                    ></div>
+                  </div>
+                  <span>{{ h.label }}</span>
+                </div>
+              </div>
+              <p class="chart-empty" *ngIf="!todayPayments().length">
+                Completa un cobro para ver el primer movimiento del día.
+              </p>
+            </article>
+            <article class="service-spotlight">
+              <span class="eyebrow">DEL SALÓN A LA COCINA</span>
+              <h2>Todo conectado.<br />Todo bajo control.</h2>
+              <p>Menos pasos entre una buena orden y una gran experiencia.</p>
+              <button (click)="go('pos')">
+                Crear una comanda
+                <i aria-hidden="true" class="bi bi-arrow-up-right"></i>
+              </button>
+              <div class="spotlight-bottom">
+                <span
+                  ><i aria-hidden="true"></i>
+                  {{ activeOrders().length }} comandas en servicio</span
+                ><i aria-hidden="true" class="bi bi-fire"></i>
+              </div>
+            </article>
+          </div>
+          <div class="two-columns">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">DALES LA BIENVENIDA</span>
+                  <h3>Próximas llegadas</h3>
+                </div>
+                <button class="text-btn" (click)="go('reservas')">
+                  Ver agenda
+                  <i aria-hidden="true" class="bi bi-arrow-up-right"></i>
+                </button>
+              </div>
+              <div class="arrival" *ngFor="let r of arrivals() | slice: 0 : 3">
+                <div class="time-block">
+                  <strong>{{ r.time }}</strong
+                  ><span>HOY</span>
+                </div>
+                <span class="avatar soft">{{ initials(r.customerName) }}</span>
+                <div class="arrival-name">
+                  <strong>{{ r.customerName }}</strong
+                  ><span>{{ r.guests }} personas · {{ r.area }}</span>
+                </div>
+                <span class="status-pill" [ngClass]="r.status.toLowerCase()">{{
+                  statusText(r.status)
+                }}</span
+                ><button
+                  class="icon-btn"
+                  [attr.aria-label]="'Ubicar a ' + r.customerName"
+                  [disabled]="busy()"
+                  (click)="seatReservation(r)"
+                >
+                  <i aria-hidden="true" class="bi bi-arrow-right"></i>
+                </button>
+              </div>
+              <p *ngIf="!arrivals().length" class="empty-state">
+                No hay más llegadas para hoy.
+              </p>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">CADA MINUTO CUENTA</span>
+                  <h3>Ritmo de cocina</h3>
+                </div>
+                <button class="text-btn" (click)="go('cocina')">
+                  Ver monitor
+                  <i aria-hidden="true" class="bi bi-arrow-up-right"></i>
+                </button>
+              </div>
+              <div class="service-list">
+                <div *ngFor="let o of activeOrders() | slice: 0 : 3">
+                  <span class="table-token">{{
+                    tableName(o.tableId).replace("Mesa ", "M")
+                  }}</span>
+                  <div>
+                    <strong>{{ tableName(o.tableId) }}</strong
+                    ><small>{{ elapsed(o.createdAt) }} · #{{ o.id }}</small>
+                  </div>
+                  <span
+                    class="status-pill"
+                    [ngClass]="o.status.toLowerCase()"
+                    >{{ statusText(o.status) }}</span
+                  >
+                </div>
+              </div>
+              <p *ngIf="!activeOrders().length" class="empty-state">
+                Cocina al día. Crea la próxima comanda desde el POS.
+              </p>
+              <div class="service-footer">
+                <span>Espera media de comandas en cocina</span
+                ><strong>{{ kitchenMinutes() }} min</strong>
+              </div>
             </article>
           </div>
         </section>
-
         <!-- RESERVAS -->
         <section *ngIf="page() === 'reservas'" class="page">
           <div class="page-tools">
-            <div class="segmented"><button [class.active]="reservationFilter() === 'ACTIVAS'" (click)="reservationFilter.set('ACTIVAS')">Activas</button><button [class.active]="reservationFilter() === 'HOY'" (click)="reservationFilter.set('HOY')">Hoy</button><button [class.active]="reservationFilter() === 'TODAS'" (click)="reservationFilter.set('TODAS')">Todas</button></div>
-            <div class="capacity-note"><i class="bi bi-info-circle"></i> La disponibilidad valida mesa, horario y capacidad.</div>
+            <div class="segmented">
+              <button
+                [class.active]="reservationFilter() === 'ACTIVAS'"
+                (click)="reservationFilter.set('ACTIVAS')"
+              >
+                Activas</button
+              ><button
+                [class.active]="reservationFilter() === 'HOY'"
+                (click)="reservationFilter.set('HOY')"
+              >
+                Hoy</button
+              ><button
+                [class.active]="reservationFilter() === 'TODAS'"
+                (click)="reservationFilter.set('TODAS')"
+              >
+                Todas
+              </button>
+            </div>
+            <div class="capacity-note">
+              <i aria-hidden="true" class="bi bi-info-circle"></i> La
+              disponibilidad valida mesa, horario y capacidad.
+            </div>
           </div>
           <div class="reservation-summary">
-            <div><span class="metric-icon green"><i class="bi bi-calendar2-check"></i></span><p><small>RESERVAS ACTIVAS</small><strong>{{filteredReservations().length}}</strong></p></div>
-            <div><span class="metric-icon terracotta"><i class="bi bi-people"></i></span><p><small>COMENSALES ESPERADOS</small><strong>{{filteredReservations() | guestSum}}</strong></p></div>
-            <div><span class="metric-icon gold"><i class="bi bi-clock-history"></i></span><p><small>PRÓXIMA LLEGADA</small><strong>19:30</strong></p></div>
+            <div>
+              <span class="metric-icon green"
+                ><i aria-hidden="true" class="bi bi-calendar2-check"></i
+              ></span>
+              <p>
+                <small>RESERVAS ACTIVAS</small
+                ><strong>{{ filteredReservations().length }}</strong>
+              </p>
+            </div>
+            <div>
+              <span class="metric-icon terracotta"
+                ><i aria-hidden="true" class="bi bi-people"></i
+              ></span>
+              <p>
+                <small>COMENSALES ESPERADOS</small
+                ><strong>{{ filteredReservations() | guestSum }}</strong>
+              </p>
+            </div>
+            <div>
+              <span class="metric-icon gold"
+                ><i aria-hidden="true" class="bi bi-clock-history"></i
+              ></span>
+              <p>
+                <small>PRÓXIMA LLEGADA</small
+                ><strong>{{ nextArrival() }}</strong>
+              </p>
+            </div>
           </div>
           <article class="panel reservation-panel">
-            <div class="panel-head"><div><span class="eyebrow">AGENDA DEL RESTAURANTE</span><h3>Control de reservaciones</h3></div><button class="btn-primary" (click)="openReservation()"><i class="bi bi-plus-lg"></i> Crear reserva</button></div>
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">AGENDA DEL RESTAURANTE</span>
+                <h3>Control de reservaciones</h3>
+              </div>
+              <button class="btn-primary" (click)="openReservation()">
+                <i aria-hidden="true" class="bi bi-plus-lg"></i> Crear reserva
+              </button>
+            </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>FECHA Y HORA</th><th>CLIENTE</th><th>PERSONAS</th><th>UBICACIÓN</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>FECHA Y HORA</th>
+                    <th>CLIENTE</th>
+                    <th>PERSONAS</th>
+                    <th>UBICACIÓN</th>
+                    <th>ESTADO</th>
+                    <th>ACCIONES</th>
+                  </tr>
+                </thead>
                 <tbody>
                   <tr *ngFor="let r of filteredReservations()">
-                    <td><strong>{{r.date | date:'dd MMM yyyy'}}</strong><span>{{r.time}}</span></td>
-                    <td><div class="customer"><span class="avatar soft">{{initials(r.customerName)}}</span><p><strong>{{r.customerName}}</strong><span>{{r.phone}}<em *ngIf="r.occasion"> · {{r.occasion}}</em></span></p></div></td>
-                    <td><strong><i class="bi bi-people"></i> {{r.guests}}</strong></td>
-                    <td><strong>{{r.tableId ? tableName(r.tableId) : 'Por asignar'}}</strong><span>{{r.area}}</span></td>
-                    <td><span class="status-pill" [ngClass]="r.status.toLowerCase()">{{statusText(r.status)}}</span></td>
-                    <td><div class="row-actions"><button *ngIf="r.status === 'PENDIENTE'" title="Confirmar" (click)="confirmReservation(r)"><i class="bi bi-check-lg"></i></button><button *ngIf="r.status === 'CONFIRMADA' || r.status === 'PENDIENTE'" title="Ubicar en mesa" (click)="seatReservation(r)"><i class="bi bi-box-arrow-in-right"></i></button><button *ngIf="r.status !== 'CANCELADA' && r.status !== 'EN_MESA'" title="Cancelar" (click)="cancelReservation(r)"><i class="bi bi-x-lg"></i></button></div></td>
+                    <td>
+                      <strong>{{ r.date | date: "dd MMM yyyy" }}</strong
+                      ><span>{{ r.time }}</span>
+                    </td>
+                    <td>
+                      <div class="customer">
+                        <span class="avatar soft">{{
+                          initials(r.customerName)
+                        }}</span>
+                        <p>
+                          <strong>{{ r.customerName }}</strong
+                          ><span
+                            >{{ r.phone
+                            }}<em *ngIf="r.occasion">
+                              · {{ r.occasion }}</em
+                            ></span
+                          >
+                        </p>
+                      </div>
+                    </td>
+                    <td>
+                      <strong
+                        ><i aria-hidden="true" class="bi bi-people"></i>
+                        {{ r.guests }}</strong
+                      >
+                    </td>
+                    <td>
+                      <strong>{{
+                        r.tableId ? tableName(r.tableId) : "Por asignar"
+                      }}</strong
+                      ><span>{{ r.area }}</span>
+                    </td>
+                    <td>
+                      <span
+                        class="status-pill"
+                        [ngClass]="r.status.toLowerCase()"
+                        >{{ statusText(r.status) }}</span
+                      >
+                    </td>
+                    <td>
+                      <div class="row-actions">
+                        <button
+                          *ngIf="r.status === 'PENDIENTE'"
+                          title="Confirmar"
+                          (click)="confirmReservation(r)"
+                        >
+                          <i
+                            aria-hidden="true"
+                            class="bi bi-check-lg"
+                          ></i></button
+                        ><button
+                          *ngIf="
+                            r.status === 'CONFIRMADA' ||
+                            r.status === 'PENDIENTE'
+                          "
+                          title="Ubicar en mesa"
+                          (click)="seatReservation(r)"
+                        >
+                          <i
+                            aria-hidden="true"
+                            class="bi bi-box-arrow-in-right"
+                          ></i></button
+                        ><button
+                          *ngIf="
+                            r.status !== 'CANCELADA' && r.status !== 'EN_MESA'
+                          "
+                          title="Cancelar"
+                          (click)="cancelReservation(r)"
+                        >
+                          <i aria-hidden="true" class="bi bi-x-lg"></i>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -122,15 +580,58 @@
 
         <!-- MESAS -->
         <section *ngIf="page() === 'salon'" class="page">
-          <div class="page-tools"><div class="legend"><span><i class="available"></i> Disponible</span><span><i class="reserved"></i> Reservada</span><span><i class="occupied"></i> Ocupada</span><span><i class="billing"></i> Por cobrar</span></div><span class="capacity-note">{{state().tables.length}} mesas · capacidad total 38</span></div>
-          <div *ngFor="let area of ['Salón','Terraza','VIP']" class="area-section">
-            <div class="area-heading"><h3>{{area}}</h3><span>{{(state().tables | areaCount:area)}} mesas</span></div>
+          <div class="page-tools">
+            <div class="legend">
+              <span
+                ><i aria-hidden="true" class="available"></i> Disponible</span
+              ><span><i aria-hidden="true" class="reserved"></i> Reservada</span
+              ><span><i aria-hidden="true" class="occupied"></i> Ocupada</span
+              ><span
+                ><i aria-hidden="true" class="billing"></i> Por cobrar</span
+              >
+            </div>
+            <span class="capacity-note"
+              >{{ state().tables.length }} mesas · capacidad total
+              {{ totalSeats() }}</span
+            >
+          </div>
+          <div
+            *ngFor="let area of ['Salón', 'Terraza', 'VIP']"
+            class="area-section"
+          >
+            <div class="area-heading">
+              <h3>{{ area }}</h3>
+              <span>{{ state().tables | areaCount: area }} mesas</span>
+            </div>
             <div class="tables-grid">
-              <button class="table-card" *ngFor="let t of state().tables | areaTables:area" [ngClass]="t.status.toLowerCase()" (click)="selectTable(t)">
-                <div class="table-top"><span class="table-icon"><i class="bi bi-grid-3x3-gap"></i></span><span class="status-dot"></span></div>
-                <div><strong>{{t.name}}</strong><span><i class="bi bi-people"></i> {{t.guests || 0}} / {{t.capacity}} personas</span></div>
-                <div class="table-meta"><span>{{statusText(t.status)}}</span><b *ngIf="t.openedAt">{{elapsed(t.openedAt)}}</b></div>
-                <div class="table-total" *ngIf="store.tableTotal(t.id)">{{store.tableTotal(t.id) | currency:'COP':'symbol-narrow':'1.0-0'}}</div>
+              <button
+                class="table-card"
+                *ngFor="let t of state().tables | areaTables: area"
+                [ngClass]="t.status.toLowerCase()"
+                (click)="selectTable(t)"
+              >
+                <div class="table-top">
+                  <span class="table-icon"
+                    ><i aria-hidden="true" class="bi bi-grid-3x3-gap"></i></span
+                  ><span class="status-dot"></span>
+                </div>
+                <div>
+                  <strong>{{ t.name }}</strong
+                  ><span
+                    ><i aria-hidden="true" class="bi bi-people"></i>
+                    {{ t.guests || 0 }} / {{ t.capacity }} personas</span
+                  >
+                </div>
+                <div class="table-meta">
+                  <span>{{ statusText(t.status) }}</span
+                  ><b *ngIf="t.openedAt">{{ elapsed(t.openedAt) }}</b>
+                </div>
+                <div class="table-total" *ngIf="store.tableTotal(t.id)">
+                  {{
+                    store.tableTotal(t.id)
+                      | currency: "COP" : "symbol-narrow" : "1.0-0"
+                  }}
+                </div>
               </button>
             </div>
           </div>
@@ -139,70 +640,659 @@
         <!-- POS -->
         <section *ngIf="page() === 'pos'" class="page pos-layout">
           <div class="pos-catalog">
-            <div class="pos-heading"><div><span class="eyebrow">NUEVA COMANDA</span><h3>Menú del restaurante</h3></div><select [ngModel]="selectedTableId()" (ngModelChange)="selectedTableId.set(+$event)"><option [ngValue]="null">Selecciona una mesa</option><option *ngFor="let t of state().tables" [ngValue]="t.id" [disabled]="t.status === 'RESERVADA'">{{t.name}} · {{statusText(t.status)}}</option></select></div>
-            <div class="category-list"><button *ngFor="let c of categories()" [class.active]="selectedCategory() === c" (click)="selectedCategory.set(c)">{{c}}</button></div>
+            <div class="pos-heading">
+              <div>
+                <span class="eyebrow">NUEVA COMANDA</span>
+                <h3>Menú del restaurante</h3>
+              </div>
+              <select
+                [ngModel]="selectedTableId()"
+                (ngModelChange)="changeTable($event)"
+              >
+                <option [ngValue]="null">Selecciona una mesa</option>
+                <option
+                  *ngFor="let t of state().tables"
+                  [ngValue]="t.id"
+                  [disabled]="t.status === 'RESERVADA'"
+                >
+                  {{ t.name }} · {{ statusText(t.status) }}
+                </option>
+              </select>
+            </div>
+            <label class="product-search"
+              ><i aria-hidden="true" class="bi bi-search"></i
+              ><input
+                aria-label="Buscar producto"
+                placeholder="Buscar plato o categoría…"
+                [ngModel]="productSearch()"
+                (ngModelChange)="productSearch.set($event)"
+            /></label>
+            <div class="category-list">
+              <button
+                *ngFor="let c of categories()"
+                [class.active]="selectedCategory() === c"
+                (click)="selectedCategory.set(c)"
+              >
+                {{ c }}
+              </button>
+            </div>
+            <p class="empty-state" *ngIf="!filteredProducts().length">
+              No hay productos para esta búsqueda.
+            </p>
             <div class="product-grid">
-              <button class="product-card" *ngFor="let p of filteredProducts()" (click)="addProduct(p)">
-                <div class="product-image"><img [src]="p.image" [alt]="p.name"><span>{{p.category}}</span><i class="bi bi-plus-lg"></i></div>
-                <div><h4>{{p.name}}</h4><p>{{p.description}}</p><strong>{{p.price | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div>
+              <button
+                class="product-card"
+                *ngFor="let p of filteredProducts()"
+                (click)="addProduct(p)"
+              >
+                <div class="product-image">
+                  <img
+                    [src]="p.image"
+                    [alt]="p.name"
+                    loading="lazy"
+                    width="400"
+                    height="250"
+                  /><span>{{ p.category }}</span
+                  ><i aria-hidden="true" class="bi bi-plus-lg"></i>
+                </div>
+                <div>
+                  <h4>{{ p.name }}</h4>
+                  <p>{{ p.description }}</p>
+                  <strong>{{
+                    p.price | currency: "COP" : "symbol-narrow" : "1.0-0"
+                  }}</strong>
+                </div>
               </button>
             </div>
           </div>
           <aside class="order-panel">
-            <div class="order-head"><div><span class="eyebrow">PEDIDO ACTUAL</span><h3>{{selectedTableId() ? tableName(selectedTableId()!) : 'Sin mesa'}}</h3></div><span class="order-number">{{cart().length}} ítems</span></div>
-            <div class="selected-table" *ngIf="selectedTableId() as id"><span class="table-token">{{tableName(id).replace('Mesa ', 'M')}}</span><div><strong>{{tableName(id)}}</strong><small>{{table(id)?.guests || 0}} comensales · Mesera Laura</small></div></div>
-            <div class="empty-cart" *ngIf="!cart().length"><i class="bi bi-basket2"></i><strong>La comanda está vacía</strong><span>Selecciona productos del menú para comenzar.</span></div>
-            <div class="cart-list" *ngIf="cart().length">
-              <div class="cart-item" *ngFor="let item of cart()"><div class="qty"><button (click)="changeQty(item.productId,-1)">−</button><strong>{{item.quantity}}</strong><button (click)="changeQty(item.productId,1)">+</button></div><div><strong>{{item.name}}</strong><input [(ngModel)]="item.notes" placeholder="Nota para cocina"></div><b>{{item.price * item.quantity | currency:'COP':'symbol-narrow':'1.0-0'}}</b></div>
+            <div class="order-head">
+              <div>
+                <span class="eyebrow">PEDIDO ACTUAL</span>
+                <h3>
+                  {{
+                    selectedTableId()
+                      ? tableName(selectedTableId()!)
+                      : "Sin mesa"
+                  }}
+                </h3>
+              </div>
+              <span class="order-number">{{ cart().length }} ítems</span>
             </div>
-            <div class="order-totals"><div><span>Subtotal</span><strong>{{cartTotal() | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div><div><span>Impuestos incluidos</span><strong>$ 0</strong></div><div class="grand"><span>Total</span><strong>{{cartTotal() | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div></div>
-            <button class="send-order" [disabled]="!cart().length" (click)="sendOrder()"><i class="bi bi-send"></i> Enviar pedido a cocina</button>
+            <div class="selected-table" *ngIf="selectedTableId() as id">
+              <span class="table-token">{{
+                tableName(id).replace("Mesa ", "M")
+              }}</span>
+              <div>
+                <strong>{{ tableName(id) }}</strong
+                ><small
+                  >{{ table(id)?.guests || 0 }} comensales ·
+                  {{ store.user()?.name }}</small
+                >
+              </div>
+            </div>
+            <div class="empty-cart" *ngIf="!cart().length">
+              <i aria-hidden="true" class="bi bi-basket2"></i
+              ><strong>La comanda está vacía</strong
+              ><span>Selecciona productos del menú para comenzar.</span>
+            </div>
+            <div class="cart-list" *ngIf="cart().length">
+              <div class="cart-item" *ngFor="let item of cart()">
+                <div class="qty">
+                  <button (click)="changeQty(item.productId, -1)">−</button
+                  ><strong>{{ item.quantity }}</strong
+                  ><button (click)="changeQty(item.productId, 1)">+</button>
+                </div>
+                <div>
+                  <strong>{{ item.name }}</strong
+                  ><input
+                    maxlength="400"
+                    [(ngModel)]="item.notes"
+                    placeholder="Nota para cocina"
+                  />
+                </div>
+                <b>{{
+                  item.price * item.quantity
+                    | currency: "COP" : "symbol-narrow" : "1.0-0"
+                }}</b>
+              </div>
+            </div>
+            <div class="order-totals">
+              <div>
+                <span>Subtotal</span
+                ><strong>{{
+                  cartTotal() | currency: "COP" : "symbol-narrow" : "1.0-0"
+                }}</strong>
+              </div>
+              <div>
+                <span>Precios de demostración</span
+                ><strong>Sin recargos</strong>
+              </div>
+              <div class="grand">
+                <span>Total</span
+                ><strong>{{
+                  cartTotal() | currency: "COP" : "symbol-narrow" : "1.0-0"
+                }}</strong>
+              </div>
+            </div>
+            <button
+              class="send-order"
+              [disabled]="busy() || !cart().length"
+              (click)="sendOrder()"
+            >
+              <i aria-hidden="true" class="bi bi-send"></i> Enviar pedido a
+              cocina
+            </button>
           </aside>
         </section>
 
         <!-- COCINA -->
         <section *ngIf="page() === 'cocina'" class="page kitchen-page">
-          <div class="kitchen-toolbar"><div><span class="live"><i></i> Sincronizado en tiempo real</span><span>Las comandas avanzan hasta “Servida” para habilitar el cobro.</span></div><strong><i class="bi bi-stopwatch"></i> Promedio 18 min</strong></div>
+          <div class="kitchen-toolbar">
+            <div>
+              <span class="live"
+                ><i aria-hidden="true"></i>
+                {{
+                  store.mode() === "demo"
+                    ? "Simulación local"
+                    : "Actualización cada 10 s"
+                }}</span
+              ><span
+                >Las comandas avanzan hasta “Servida” para habilitar el
+                cobro.</span
+              >
+            </div>
+            <strong
+              ><i aria-hidden="true" class="bi bi-stopwatch"></i> Espera actual
+              {{ kitchenMinutes() }} min</strong
+            >
+          </div>
           <div class="kitchen-board">
-            <div class="kitchen-column" *ngFor="let status of ['NUEVA','PREPARANDO','LISTA']">
-              <div class="column-head"><h3><i [ngClass]="{'new':status === 'NUEVA','prep':status === 'PREPARANDO','ready':status === 'LISTA'}"></i>{{statusText(status)}}</h3><span>{{(activeOrders() | orderStatus:status).length}}</span></div>
-              <div class="ticket" *ngFor="let o of activeOrders() | orderStatus:status">
-                <div class="ticket-head"><div><span class="table-token">{{tableName(o.tableId).replace('Mesa ', 'M')}}</span><p><strong>{{tableName(o.tableId)}}</strong><small>Comanda #{{o.id}}</small></p></div><span class="ticket-time" [class.late]="elapsed(o.createdAt).replace(' min','') > '25'">{{elapsed(o.createdAt)}}</span></div>
-                <div class="ticket-items"><div *ngFor="let i of o.items"><strong>{{i.quantity}}×</strong><span>{{i.name}}<em *ngIf="i.notes">{{i.notes}}</em></span></div></div>
-                <div class="ticket-foot"><span><i class="bi bi-person"></i> {{o.waiter}}</span><button (click)="advance(o)"><i class="bi" [ngClass]="actionIcon(o)"></i>{{actionLabel(o)}}</button></div>
+            <div
+              class="kitchen-column"
+              *ngFor="let status of ['NUEVA', 'PREPARANDO', 'LISTA']"
+            >
+              <div class="column-head">
+                <h3>
+                  <i
+                    aria-hidden="true"
+                    [ngClass]="{
+                      new: status === 'NUEVA',
+                      prep: status === 'PREPARANDO',
+                      ready: status === 'LISTA',
+                    }"
+                  ></i
+                  >{{ statusText(status) }}
+                </h3>
+                <span>{{ (activeOrders() | orderStatus: status).length }}</span>
               </div>
-              <div class="column-empty" *ngIf="!(activeOrders() | orderStatus:status).length"><i class="bi bi-check2-circle"></i><span>Sin comandas</span></div>
+              <div
+                class="ticket"
+                *ngFor="let o of activeOrders() | orderStatus: status"
+              >
+                <div class="ticket-head">
+                  <div>
+                    <span class="table-token">{{
+                      tableName(o.tableId).replace("Mesa ", "M")
+                    }}</span>
+                    <p>
+                      <strong>{{ tableName(o.tableId) }}</strong
+                      ><small>Comanda #{{ o.id }}</small>
+                    </p>
+                  </div>
+                  <span
+                    class="ticket-time"
+                    [class.late]="elapsedMinutes(o.createdAt) > 25"
+                    >{{ elapsed(o.createdAt) }}</span
+                  >
+                </div>
+                <div class="ticket-items">
+                  <div *ngFor="let i of o.items">
+                    <strong>{{ i.quantity }}×</strong
+                    ><span
+                      >{{ i.name }}<em *ngIf="i.notes">{{ i.notes }}</em></span
+                    >
+                  </div>
+                </div>
+                <div class="ticket-foot">
+                  <span
+                    ><i aria-hidden="true" class="bi bi-person"></i>
+                    {{ o.waiter }}</span
+                  ><button [disabled]="busy()" (click)="advance(o)">
+                    <i
+                      aria-hidden="true"
+                      class="bi"
+                      [ngClass]="actionIcon(o)"
+                    ></i
+                    >{{ actionLabel(o) }}
+                  </button>
+                </div>
+              </div>
+              <div
+                class="column-empty"
+                *ngIf="!(activeOrders() | orderStatus: status).length"
+              >
+                <i aria-hidden="true" class="bi bi-check2-circle"></i
+                ><span>Sin comandas pendientes</span>
+              </div>
             </div>
           </div>
-          <article class="served-strip" *ngIf="(activeOrders() | orderStatus:'SERVIDA').length"><div><i class="bi bi-check2-all"></i><span><strong>Pedidos entregados</strong><small>Listos para cobrar en caja</small></span></div><div class="served-chips"><button *ngFor="let o of activeOrders() | orderStatus:'SERVIDA'" (click)="selectedTableId.set(o.tableId); go('caja')">{{tableName(o.tableId)}} · {{orderTotal(o) | currency:'COP':'symbol-narrow':'1.0-0'}} <i class="bi bi-arrow-right"></i></button></div></article>
+          <article
+            class="served-strip"
+            *ngIf="(activeOrders() | orderStatus: 'SERVIDA').length"
+          >
+            <div>
+              <i aria-hidden="true" class="bi bi-check2-all"></i
+              ><span
+                ><strong>Pedidos entregados</strong
+                ><small>Listos para cobrar en caja</small></span
+              >
+            </div>
+            <div class="served-chips">
+              <button
+                *ngFor="let o of activeOrders() | orderStatus: 'SERVIDA'"
+                (click)="selectedTableId.set(o.tableId); go('caja')"
+              >
+                {{ tableName(o.tableId) }} ·
+                {{
+                  orderTotal(o) | currency: "COP" : "symbol-narrow" : "1.0-0"
+                }}
+                <i aria-hidden="true" class="bi bi-arrow-right"></i>
+              </button>
+            </div>
+          </article>
         </section>
 
         <!-- CAJA -->
         <section *ngIf="page() === 'caja'" class="page">
-          <div class="cash-summary"><div><small>VENTAS REGISTRADAS</small><strong>{{salesToday() | currency:'COP':'symbol-narrow':'1.0-0'}}</strong><span><i class="bi bi-arrow-up"></i> 12,4% sobre ayer</span></div><div><small>PAGOS DE LA DEMO</small><strong>{{state().payments.length}}</strong><span>Transacciones completadas</span></div><div><small>PENDIENTE POR COBRAR</small><strong>{{(state().orders | unpaidTotal) | currency:'COP':'symbol-narrow':'1.0-0'}}</strong><span>{{activeOrders().length}} comandas abiertas</span></div></div>
+          <div class="cash-summary">
+            <div>
+              <small>VENTAS REGISTRADAS</small
+              ><strong>{{
+                salesToday() | currency: "COP" : "symbol-narrow" : "1.0-0"
+              }}</strong
+              ><span
+                ><i aria-hidden="true" class="bi bi-arrow-up"></i> Pagos
+                recibidos hoy</span
+              >
+            </div>
+            <div>
+              <small>PAGOS DEL DÍA</small
+              ><strong>{{ todayPayments().length }}</strong
+              ><span>Transacciones completadas</span>
+            </div>
+            <div>
+              <small>PENDIENTE POR COBRAR</small
+              ><strong>{{
+                state().orders
+                  | unpaidTotal
+                  | currency: "COP" : "symbol-narrow" : "1.0-0"
+              }}</strong
+              ><span>{{ activeOrders().length }} comandas abiertas</span>
+            </div>
+          </div>
           <div class="billing-grid">
-            <article class="bill-card" *ngFor="let t of state().tables">
+            <article class="bill-card" *ngFor="let t of billingTables()">
               <ng-container *ngIf="store.tableTotal(t.id) > 0">
-                <div class="bill-head"><span class="table-token">{{t.name.replace('Mesa ', 'M')}}</span><div><h3>{{t.name}}</h3><span>{{t.guests}} comensales · {{elapsed(t.openedAt)}}</span></div><span class="status-pill" [ngClass]="t.status.toLowerCase()">{{statusText(t.status)}}</span></div>
-                <div class="bill-orders"><div *ngFor="let o of tableOrders(t.id)"><span>Comanda #{{o.id}} · {{o.items.length}} productos</span><strong>{{orderTotal(o) | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div></div>
-                <div class="bill-total"><span>Total de la mesa</span><strong>{{store.tableTotal(t.id) | currency:'COP':'symbol-narrow':'1.0-0'}}</strong></div>
-                <button class="btn-primary full" [disabled]="t.status !== 'POR_COBRAR'" (click)="pay(t.id)"><i class="bi bi-credit-card"></i> {{t.status === 'POR_COBRAR' ? 'Cobrar y liberar mesa' : 'Esperando servicio'}}</button>
+                <div class="bill-head">
+                  <span class="table-token">{{
+                    t.name.replace("Mesa ", "M")
+                  }}</span>
+                  <div>
+                    <h3>{{ t.name }}</h3>
+                    <span
+                      >{{ t.guests }} comensales ·
+                      {{ elapsed(t.openedAt) }}</span
+                    >
+                  </div>
+                  <span
+                    class="status-pill"
+                    [ngClass]="t.status.toLowerCase()"
+                    >{{ statusText(t.status) }}</span
+                  >
+                </div>
+                <div class="bill-orders">
+                  <div *ngFor="let o of tableOrders(t.id)">
+                    <span
+                      >Comanda #{{ o.id }} ·
+                      {{ o.items.length }} productos</span
+                    ><strong>{{
+                      orderTotal(o)
+                        | currency: "COP" : "symbol-narrow" : "1.0-0"
+                    }}</strong>
+                  </div>
+                </div>
+                <div class="bill-total">
+                  <span>Total de la mesa</span
+                  ><strong>{{
+                    store.tableTotal(t.id)
+                      | currency: "COP" : "symbol-narrow" : "1.0-0"
+                  }}</strong>
+                </div>
+                <button
+                  class="btn-primary full"
+                  [disabled]="busy() || t.status !== 'POR_COBRAR'"
+                  (click)="pay(t.id)"
+                >
+                  <i aria-hidden="true" class="bi bi-credit-card"></i>
+                  {{
+                    t.status === "POR_COBRAR"
+                      ? "Cobrar y liberar mesa"
+                      : "Esperando servicio"
+                  }}
+                </button>
               </ng-container>
             </article>
           </div>
-          <article class="panel history" *ngIf="state().payments.length"><div class="panel-head"><div><span class="eyebrow">CIERRE DE CAJA</span><h3>Pagos recientes</h3></div></div><div class="payment-row" *ngFor="let p of state().payments"><span class="metric-icon green"><i class="bi bi-check-lg"></i></span><div><strong>{{tableName(p.tableId)}} · {{statusText(p.method)}}</strong><span>{{p.createdAt | date:'short'}}</span></div><b>{{p.amount | currency:'COP':'symbol-narrow':'1.0-0'}}</b></div></article>
+          <article class="panel history" *ngIf="state().payments.length">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">CIERRE DE CAJA</span>
+                <h3>Pagos recientes</h3>
+              </div>
+            </div>
+            <div class="payment-row" *ngFor="let p of todayPayments()">
+              <span class="metric-icon green"
+                ><i aria-hidden="true" class="bi bi-check-lg"></i
+              ></span>
+              <div>
+                <strong
+                  >{{ tableName(p.tableId) }} ·
+                  {{ statusText(p.method) }}</strong
+                ><span>{{ p.createdAt | date: "short" }}</span>
+              </div>
+              <b>{{
+                p.amount | currency: "COP" : "symbol-narrow" : "1.0-0"
+              }}</b>
+            </div>
+          </article>
         </section>
+
+        <section class="page" *ngIf="page() === 'reportes' && isFinance()">
+          <div class="dashboard-heading">
+            <div>
+              <span class="eyebrow">DECISIONES CON DATOS</span>
+              <h1>Tu servicio, en cifras.</h1>
+              <p>
+                Pagos del día en hora de Bogotá. Los valores cambian al
+                registrar cobros.
+              </p>
+            </div>
+            <button class="btn-primary" (click)="exportReport()">
+              <i aria-hidden="true" class="bi bi-download"></i> Exportar CSV
+            </button>
+          </div>
+          <div class="cash-summary">
+            <div>
+              <small>VENTAS DE HOY</small
+              ><strong>{{ money(salesToday()) }}</strong
+              ><span>{{ todayPayments().length }} pagos recibidos</span>
+            </div>
+            <div>
+              <small>TICKET PROMEDIO</small
+              ><strong>{{ money(averageTicket()) }}</strong
+              ><span>Importe medio por cobro</span>
+            </div>
+            <div>
+              <small>COMANDAS SIN COBRAR</small
+              ><strong>{{ money(pendingTotal()) }}</strong
+              ><span>Incluye pedidos aún en preparación</span>
+            </div>
+          </div>
+          <div class="two-columns">
+            <article class="panel">
+              <div class="panel-head"><h3>Distribución de pagos</h3></div>
+              <div class="report-method" *ngFor="let m of paymentMethods()">
+                <div>
+                  <span>{{ statusText(m.method) }}</span
+                  ><strong>{{ money(m.amount) }}</strong>
+                </div>
+                <div class="metric-progress">
+                  <i
+                    aria-hidden="true"
+                    [style.width.%]="
+                      salesToday() ? (m.amount / salesToday()) * 100 : 0
+                    "
+                  ></i>
+                </div>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-head"><h3>Platos vendidos de hoy</h3></div>
+              <div
+                class="report-method"
+                *ngFor="let p of topProducts(); let i = index"
+              >
+                <div>
+                  <span>{{ i + 1 }}. {{ p.name }}</span
+                  ><strong>{{ p.quantity }} uds.</strong>
+                </div>
+                <small>{{ money(p.amount) }}</small>
+              </div>
+              <p class="empty-state" *ngIf="!topProducts().length">
+                Las comandas creadas hoy y cobradas aparecerán aquí.
+              </p>
+            </article>
+          </div>
+        </section>
+        <section class="page" *ngIf="page() === 'configuracion'">
+          <div class="dashboard-heading">
+            <div>
+              <span class="eyebrow">HECHO PARA TU EQUIPO</span>
+              <h1>Mi espacio de trabajo</h1>
+              <p>Tu sesión y el estado del servicio, a la vista.</p>
+            </div>
+          </div>
+          <div class="settings-grid">
+            <article class="panel setting-card">
+              <span class="metric-icon blue"
+                ><i aria-hidden="true" class="bi bi-person-lock"></i
+              ></span>
+              <h3>{{ store.user()?.name }}</h3>
+              <p>{{ statusText(role()) }} · {{ store.user()?.username }}</p>
+              <small>{{
+                store.mode() === "demo"
+                  ? "Los roles de la simulación permiten explorar cada experiencia."
+                  : "El servidor verifica el rol en cada operación."
+              }}</small
+              ><button
+                class="btn-secondary"
+                (click)="logout()"
+                [disabled]="busy()"
+              >
+                Cerrar sesión
+                <i aria-hidden="true" class="bi bi-box-arrow-right"></i>
+              </button>
+            </article>
+            <article class="panel setting-card">
+              <span class="metric-icon green"
+                ><i aria-hidden="true" class="bi bi-hdd-network"></i
+              ></span>
+              <h3>
+                {{
+                  store.mode() === "demo"
+                    ? "Simulación local"
+                    : store.error()
+                      ? "Conexión pendiente"
+                      : "Backend conectado"
+                }}
+              </h3>
+              <p>
+                {{
+                  store.mode() === "demo"
+                    ? "Datos guardados en este navegador."
+                    : "Actualización automática cada 10 segundos."
+                }}
+              </p>
+              <small *ngIf="store.updatedAt()"
+                >Última actualización:
+                {{ store.updatedAt() | date: "HH:mm:ss" }}</small
+              ><button
+                class="btn-secondary"
+                (click)="store.mode() === 'demo' ? resetDemo() : refresh()"
+                [disabled]="busy()"
+              >
+                {{
+                  store.mode() === "demo"
+                    ? "Reiniciar demo"
+                    : "Actualizar datos"
+                }}
+                <i aria-hidden="true" class="bi bi-arrow-clockwise"></i>
+              </button>
+            </article>
+            <article class="panel setting-card">
+              <span class="metric-icon gold"
+                ><i aria-hidden="true" class="bi bi-shield-check"></i
+              ></span>
+              <h3>Un demo con propósito</h3>
+              <p>Reservas, salón, comandas, cocina y cobros manuales.</p>
+              <small
+                >Los pagos se registran después de confirmar el ingreso por
+                fuera de la app. Este demo no emite factura electrónica ni
+                conecta con la DIAN.</small
+              ><a
+                class="btn-primary"
+                href="https://wa.me/573233098671"
+                target="_blank"
+                rel="noopener"
+                >Hablemos de tu restaurante
+                <i aria-hidden="true" class="bi bi-arrow-up-right"></i
+              ></a>
+            </article>
+          </div>
+        </section>
+        <footer class="app-footer">
+          <span>NATIVA <b>por JGMSolutions</b></span
+          ><span
+            >{{
+              store.mode() === "demo"
+                ? "Demo · datos simulados"
+                : "Sesión protegida · API"
+            }}
+            · Hecho para servir mejor</span
+          >
+        </footer>
       </div>
     </main>
   </div>
 
   <!-- MODAL RESERVA -->
-  <div class="modal-backdrop" *ngIf="reservationModal()" (click)="reservationModal.set(false)">
-    <section class="modal-card" (click)="$event.stopPropagation()">
-      <div class="modal-head"><div><span class="eyebrow">NUEVA RESERVACIÓN</span><h2>Recibir a un cliente</h2><p>Registra los datos y asegura la mejor mesa disponible.</p></div><button class="icon-btn" (click)="reservationModal.set(false)"><i class="bi bi-x-lg"></i></button></div>
+  <div
+    class="modal-backdrop"
+    *ngIf="reservationModal() && canReserve()"
+    (click)="reservationModal.set(false)"
+  >
+    <section
+      role="dialog"
+      aria-modal="true"
+      aria-label="Nueva reserva"
+      class="modal-card"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow">NUEVA RESERVACIÓN</span>
+          <h2>Recibir a un cliente</h2>
+          <p>Registra los datos y asegura la mejor mesa disponible.</p>
+        </div>
+        <button
+          class="icon-btn"
+          aria-label="Cerrar reserva"
+          (click)="reservationModal.set(false)"
+        >
+          <i aria-hidden="true" class="bi bi-x-lg"></i>
+        </button>
+      </div>
       <form (ngSubmit)="saveReservation()">
-        <div class="form-grid"><label class="wide"><span>Nombre del cliente *</span><input name="customer" [(ngModel)]="reservationDraft.customerName" placeholder="Ej. Camila Rodríguez"></label><label><span>Teléfono *</span><input name="phone" [(ngModel)]="reservationDraft.phone" placeholder="300 000 0000"></label><label><span>Número de personas *</span><input name="guests" [(ngModel)]="reservationDraft.guests" type="number" min="1" max="20"></label><label><span>Fecha *</span><input name="date" [(ngModel)]="reservationDraft.date" type="date" [min]="today"></label><label><span>Hora *</span><input name="time" [(ngModel)]="reservationDraft.time" type="time"></label><label><span>Área preferida</span><select name="area" [(ngModel)]="reservationDraft.area"><option>Salón</option><option>Terraza</option><option>VIP</option></select></label><label><span>Mesa (opcional)</span><select name="table" [(ngModel)]="reservationDraft.tableId"><option [ngValue]="null">Asignar al llegar</option><option *ngFor="let t of state().tables" [ngValue]="t.id" [disabled]="t.capacity < reservationDraft.guests">{{t.name}} · {{t.capacity}} pax</option></select></label><label><span>Ocasión</span><select name="occasion" [(ngModel)]="reservationDraft.occasion"><option value="">Ninguna</option><option>Cumpleaños</option><option>Aniversario</option><option>Negocios</option><option>Celebración</option></select></label><label class="wide"><span>Notas para el equipo</span><textarea name="notes" [(ngModel)]="reservationDraft.notes" rows="3" placeholder="Alergias, silla para bebé, ubicación especial..."></textarea></label></div>
-        <div class="modal-actions"><button type="button" class="btn-secondary" (click)="reservationModal.set(false)">Cancelar</button><button class="btn-primary" type="submit"><i class="bi bi-calendar2-check"></i> Guardar reserva</button></div>
+        <div class="form-grid">
+          <label class="wide"
+            ><span>Nombre del cliente *</span
+            ><input
+              name="customer"
+              maxlength="120"
+              required
+              [(ngModel)]="reservationDraft.customerName"
+              placeholder="Ej. Camila Rodríguez" /></label
+          ><label
+            ><span>Teléfono *</span
+            ><input
+              name="phone"
+              maxlength="30"
+              required
+              [(ngModel)]="reservationDraft.phone"
+              placeholder="300 000 0000" /></label
+          ><label
+            ><span>Número de personas *</span
+            ><input
+              name="guests"
+              [(ngModel)]="reservationDraft.guests"
+              type="number"
+              min="1"
+              max="20" /></label
+          ><label
+            ><span>Fecha *</span
+            ><input
+              name="date"
+              [(ngModel)]="reservationDraft.date"
+              type="date"
+              [min]="today()" /></label
+          ><label
+            ><span>Hora *</span
+            ><input
+              name="time"
+              [(ngModel)]="reservationDraft.time"
+              type="time" /></label
+          ><label
+            ><span>Área preferida</span
+            ><select name="area" [(ngModel)]="reservationDraft.area">
+              <option>Salón</option>
+              <option>Terraza</option>
+              <option>VIP</option>
+            </select></label
+          ><label
+            ><span>Mesa (opcional)</span
+            ><select name="table" [(ngModel)]="reservationDraft.tableId">
+              <option [ngValue]="null">Asignar al llegar</option>
+              <option
+                *ngFor="let t of state().tables"
+                [ngValue]="t.id"
+                [disabled]="t.capacity < reservationDraft.guests"
+              >
+                {{ t.name }} · {{ t.capacity }} pax
+              </option>
+            </select></label
+          ><label
+            ><span>Ocasión</span
+            ><select name="occasion" [(ngModel)]="reservationDraft.occasion">
+              <option value="">Ninguna</option>
+              <option>Cumpleaños</option>
+              <option>Aniversario</option>
+              <option>Negocios</option>
+              <option>Celebración</option>
+            </select></label
+          ><label class="wide"
+            ><span>Notas para el equipo</span
+            ><textarea
+              name="notes"
+              maxlength="600"
+              [(ngModel)]="reservationDraft.notes"
+              rows="3"
+              placeholder="Alergias, silla para bebé, ubicación especial..."
+            ></textarea>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="reservationModal.set(false)"
+          >
+            Cancelar</button
+          ><button class="btn-primary" type="submit" [disabled]="busy()">
+            <i aria-hidden="true" class="bi bi-calendar2-check"></i> Guardar
+            reserva
+          </button>
+        </div>
       </form>
     </section>
   </div>

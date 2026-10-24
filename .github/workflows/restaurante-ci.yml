@@ -1,0 +1,39 @@
+name: Restaurante · Frontend y backend
+on:
+  pull_request:
+  push:
+    branches: [main, 'feature/restaurante-*']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: '17'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: app-pos-restaurante-v2/frontend/package-lock.json
+      - name: Backend y migraciones
+        run: mvn -B -f app-pos-restaurante-v2/backend/pom.xml verify
+      - name: Instalar frontend
+        working-directory: app-pos-restaurante-v2/frontend
+        run: npm ci
+      - name: Compilar Angular
+        working-directory: app-pos-restaurante-v2/frontend
+        run: npm run build
+      - name: Instalar navegador
+        working-directory: app-pos-restaurante-v2/frontend
+        run: npx playwright install --with-deps chromium
+      - name: Demo responsive y roles
+        working-directory: app-pos-restaurante-v2/frontend
+        run: npm test
+      - name: Integración Angular y Spring Boot
+        working-directory: app-pos-restaurante-v2/frontend
+        run: npm run test:api

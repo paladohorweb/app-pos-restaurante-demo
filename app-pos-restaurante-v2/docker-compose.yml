@@ -4,14 +4,15 @@ services:
     environment:
       MYSQL_DATABASE: nativa_pos
       MYSQL_USER: nativa
-      MYSQL_PASSWORD: nativa_secret
-      MYSQL_ROOT_PASSWORD: root_secret
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+      TZ: America/Bogota
     volumes:
       - nativa_mysql:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3308:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_secret"]
+      test: ["CMD-SHELL", 'mysqladmin ping -h localhost -u root -p"$$MYSQL_ROOT_PASSWORD" --silent']
       interval: 5s
       timeout: 4s
       retries: 20
@@ -19,20 +20,28 @@ services:
     build: ./backend
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_URL: jdbc:mysql://mysql:3306/nativa_pos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      DB_USER: nativa
-      DB_PASSWORD: nativa_secret
+      DB_URL: jdbc:mysql://mysql:3306/nativa_pos?useSSL=false&serverTimezone=America/Bogota&allowPublicKeyRetrieval=true
+      DB_USERNAME: nativa
+      DB_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en .env}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
+      BOOTSTRAP_ADMIN_USERNAME: ${BOOTSTRAP_ADMIN_USERNAME:-owner}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?Define BOOTSTRAP_ADMIN_PASSWORD en .env}
+      COOKIE_SECURE: "false"
       CORS_ORIGIN: http://localhost:4200,http://localhost:8081
+      JGM_LICENSE_ENABLED: ${JGM_LICENSE_ENABLED:-false}
+      JGM_CONTROL_URL: ${JGM_CONTROL_URL:-}
+      JGM_INTEGRATION_KEY: ${JGM_INTEGRATION_KEY:-}
+      TZ: America/Bogota
     depends_on:
       mysql:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
   frontend:
     build: ./frontend
     depends_on:
       - backend
     ports:
-      - "8081:80"
+      - "127.0.0.1:8081:80"
 volumes:
   nativa_mysql:

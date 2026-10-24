@@ -5,7 +5,9 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM nginx:stable-alpine
 COPY --from=build /app/dist/nativa-pos/browser /usr/share/nginx/html
+COPY config/api/runtime-config.json /usr/share/nginx/html/assets/runtime-config.json
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
+

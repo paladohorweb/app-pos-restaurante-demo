@@ -1,8 +1,6 @@
-node_modules/
-.npm-cache/
-dist/
-target/
-.idea/
-.vscode/
-*.log
+**/.angular/
+**/node_modules/
+**/dist/
+**/target/
 .env
+*.log

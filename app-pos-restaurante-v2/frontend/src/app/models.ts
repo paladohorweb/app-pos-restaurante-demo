@@ -1,12 +1,25 @@
-export type Page = 'inicio' | 'reservas' | 'salon' | 'pos' | 'cocina' | 'caja';
-export type TableStatus = 'DISPONIBLE' | 'RESERVADA' | 'OCUPADA' | 'POR_COBRAR';
-export type ReservationStatus = 'PENDIENTE' | 'CONFIRMADA' | 'EN_MESA' | 'CANCELADA' | 'NO_ASISTIO';
-export type KitchenStatus = 'NUEVA' | 'PREPARANDO' | 'LISTA' | 'SERVIDA';
+export type Page =
+  | "inicio"
+  | "reservas"
+  | "salon"
+  | "pos"
+  | "cocina"
+  | "caja"
+  | "reportes"
+  | "configuracion";
+export type TableStatus = "DISPONIBLE" | "RESERVADA" | "OCUPADA" | "POR_COBRAR";
+export type ReservationStatus =
+  | "PENDIENTE"
+  | "CONFIRMADA"
+  | "EN_MESA"
+  | "CANCELADA"
+  | "NO_ASISTIO";
+export type KitchenStatus = "NUEVA" | "PREPARANDO" | "LISTA" | "SERVIDA";
 
 export interface RestaurantTable {
   id: number;
   name: string;
-  area: 'Salón' | 'Terraza' | 'VIP';
+  area: "Salón" | "Terraza" | "VIP";
   capacity: number;
   status: TableStatus;
   guests?: number;
@@ -48,7 +61,7 @@ export interface Reservation {
   date: string;
   time: string;
   guests: number;
-  area: 'Salón' | 'Terraza' | 'VIP';
+  area: "Salón" | "Terraza" | "VIP";
   tableId: number | null;
   occasion: string;
   notes: string;
@@ -60,7 +73,7 @@ export interface Payment {
   tableId: number;
   createdAt: string;
   amount: number;
-  method: 'EFECTIVO' | 'TARJETA' | 'NEQUI' | 'DAVIPLATA';
+  method: "EFECTIVO" | "TARJETA" | "NEQUI" | "DAVIPLATA";
 }
 
 export interface DemoState {
